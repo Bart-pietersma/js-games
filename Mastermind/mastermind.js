@@ -15,7 +15,7 @@ customElements.define("master-mind", class MasterMind extends HTMLElement{
         this.init = true;
         this.colors = this.makeRandomColors();
         this.secret = this.makeSecretCode();
-        
+        console.log(this.secret);
     }
     connectedCallback(){
         if(this.init){
@@ -28,14 +28,24 @@ customElements.define("master-mind", class MasterMind extends HTMLElement{
             }
             console.log(this.lastElementChild);
             this.lastElementChild.toggleActive();
+
+            const colorShowDiv = document.createElement("div");
+            colorShowDiv.id = "colorShowDiv";
+            this.colors.map(color =>{
+                const div = document.createElement('div');
+                div.style.backgroundColor = color;
+                colorShowDiv.append(div);
+            });
+            this.append(colorShowDiv);
             this.init = false;
         }
     }
 
     makeRandomColors(){
-        const array = [];
-        for(let i = 0; i< this.colorCount ; i++) {
-           array.push("#" + Math.floor(Math.random()*16777215).toString(16));
+        const array = []
+        while(array.length < this.colorCount){
+            const color = "#" + Math.floor(Math.random()*16777215).toString(16);
+            if(color.length == 7) array.push(color);
         }
         return array;
     }
@@ -45,6 +55,10 @@ customElements.define("master-mind", class MasterMind extends HTMLElement{
         while(numbers.length < this.slots){
             const i = Math.floor(Math.random() * this.colorCount);
             if(numbers.indexOf(i) == -1) numbers.push(i);
+            else{
+                // now we have a repeat check if numbers have less than maximum alowed
+               if(numbers.map(color =>{if(color === i)return 1;}).length <= this.slots /2)numbers.push(i);
+            }
         }
         const array = [];
         for(const i of numbers){
@@ -63,7 +77,7 @@ customElements.define("master-mind", class MasterMind extends HTMLElement{
             if(this.secret[i] == col)corect ++
             i++
         });
-        if(corect == this.slots){}//todo winn
+        if(corect == this.slots)this.win();
         else{
             this.activeRow.setHints(color,corect);
             this.changeActiveRow();
@@ -77,8 +91,7 @@ customElements.define("master-mind", class MasterMind extends HTMLElement{
            curent.toggleActive();
            nextRow.toggleActive();
        }else{
-        // end of game
-        console.log("end of game");
+        this.lost();
        }
        return nextRow;
     }
@@ -90,11 +103,18 @@ customElements.define("master-mind", class MasterMind extends HTMLElement{
         return +this.getAttribute("rows");
     }
     get colorCount(){
-        return +this.getAttribute("colors");
+        return Math.round(this.slots * 1.5);
     }
 
     get activeRow(){
         return this.querySelector(`[active]`);
+    }
+
+    win(){
+        window.alert("u won");
+    }
+    lost(){
+        window.alert("u lost");
     }
     
 });

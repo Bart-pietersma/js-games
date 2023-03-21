@@ -48,6 +48,4 @@ customElements.define("master-row" , class MasterRow extends HTMLElement{
         this.setAttribute("hint2", corect);
     }
 
-
 });
-

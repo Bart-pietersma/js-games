@@ -38,10 +38,9 @@ customElements.define("master-slot" , class MasterSlot extends HTMLElement{
     }
 
     changeColor(operator = 1){
-        let index = this.color + operator;
-        if(index < 1)index = this.board.colorCount -1;
+        let index = this.style.backgroundColor == "" ? 0 : this.color + operator;
+        if(index < 0)index = this.board.colorCount -1;
         else if(index +1 > this.board.colors.length) index = 0;
-        console.log(index);
         this.style.backgroundColor = this.board.colors[index];
         this.setAttribute('color', index);
     }
