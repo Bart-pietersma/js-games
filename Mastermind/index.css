@@ -1,0 +1,14 @@
+body{
+    color: #fff;
+    background-color: darkslategray;
+}
+
+.wrapper{
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.wrapper *{
+    margin-inline: 0.5em;
+}

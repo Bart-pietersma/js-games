@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="index.css">
+    </head>
+    <body>
+        <div class="wrapper">
+            <h1>Mastermind</h1>
+            <p>gemaakt door Bart</p>
+        </div>
+        <div class="wrapper">
+            <master-mind slots="4" colors="6" rows="12"></master-mind>
+            <fieldset>
+                <legend>buttons</legend>
+                <button onclick="document.querySelector('master-mind').checkCode()">check</button>
+            </fieldset>
+        </div>
+
+        <script type="module" src="mastermind.js"></script>
+    </body>
+</html>

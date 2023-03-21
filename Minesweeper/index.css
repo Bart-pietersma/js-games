@@ -1,0 +1,10 @@
+body{
+    color: #fff;
+    background-color: darkslategray;
+}
+
+.wrapper{
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}

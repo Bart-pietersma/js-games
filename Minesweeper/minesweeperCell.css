@@ -1,0 +1,38 @@
+:root{
+    --cell-size : 3em;
+    --color-norm : #194cd8;
+    --color-hover : #4674f3 ;
+    --color-active : #002eac ;
+    --color-sweep : #ba1010 ;
+}
+
+sweep-cell{
+    background-color: var(--color-norm);
+    width: var(--cell-size);
+    height: var(--cell-size);
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    outline: auto;
+}
+
+sweep-cell:hover{
+    background-color: var(--color-hover);
+}
+
+sweep-cell:active{
+    background-color: var(--color-active);
+}
+
+sweep-cell[sweep]{
+    background-color: var(--color-sweep);
+
+}
+
+sweep-cell[sweep]::before{
+    content: attr(sweep);
+}
+
+[flag]::after{
+    content: "🚩";
+}

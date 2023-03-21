@@ -1,0 +1,5 @@
+minesweeper-board{
+    display: grid;
+    justify-content: center;
+    grid-template-columns: repeat(var(--x) , var(--cell-size)) ;
+}
