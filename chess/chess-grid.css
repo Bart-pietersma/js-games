@@ -1,0 +1,23 @@
+:root{
+    --square-size : 5em;
+    --square-color-1 : rgb(193, 230, 240);
+    --square-color-2 : rgb(62, 24, 14);
+}
+
+chess-grid{
+    display: grid;
+    grid-template-columns: repeat(var(--x),var(--square-size));
+    width: fit-content;
+    justify-items: center;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+}
+
+chess-tile{
+    width: var(--square-size);
+    height: var(--square-size);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

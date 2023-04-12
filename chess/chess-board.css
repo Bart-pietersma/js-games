@@ -1,0 +1,70 @@
+:root{
+    --border-color : gray ;
+
+}
+
+body{
+    background-color: beige;
+}
+
+chess-board {
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    text-align: center;
+    user-select: none;
+}
+
+.columnbar{
+    display: flex;
+    background-color: var(--border-color);
+    border-radius: 5px 5px 0 0;
+}
+
+.columnbar ~ .columnbar{
+    border-radius: 0 0 5px 5px;
+}
+
+.columnbar > div{
+    width: var(--square-size);
+}
+
+.columnbar::before, .columnbar::after{
+    content: attr(y);
+    visibility: hidden;
+}
+
+.columnbar::before, .columnbar::after, .rowbar{
+    padding-inline: 5px;
+}
+
+.rowbar{
+    line-height: var(--square-size);
+    background-color: gray;
+}
+
+/* aling grid */
+chess-grid{
+    grid-column: 2;
+}
+
+.columnbar{
+    grid-row: 1;
+    grid-column: span 3;
+}
+
+.columnbar ~ .columnbar{
+    grid-row: 3;
+}
+
+.rowbar{
+    grid-row: 2;
+    grid-column: 1;
+}
+
+.rowbar ~ .rowbar{
+    grid-column: 3;
+}
+/* end align grid */

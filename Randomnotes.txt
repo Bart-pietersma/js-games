@@ -1,1 +1,3 @@
+https://github.com/Bart-pietersma/js-games
 
+https://github.com/solitaire-game/solitaire-game.github.io

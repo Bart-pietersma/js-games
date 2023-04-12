@@ -73,8 +73,8 @@ customElements.define("master-mind", class MasterMind extends HTMLElement{
         let color = 0;
         let i = 0;
         code.map(col =>{
-            if(this.secret.includes(col)) color ++;
             if(this.secret[i] == col)corect ++
+            else if(this.secret.includes(col)) color ++;
             i++
         });
         if(corect == this.slots)this.win();
