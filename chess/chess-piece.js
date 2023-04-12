@@ -93,28 +93,41 @@ class ChessPiece extends HTMLElement{
 
     get allowedMoves(){
         //looks at the moves and check ec dont go over pieces cant move in a direction that alowes the king to be taken
-        if(this.type == 'rook' || 'bishop' || 'queen'){
-            //todo reduced the rows till a piece and concat to make 1 array witt cells
-           return this.moves.map(row => this.allowedRowMove(row));
+        if(this.type == 'rook' || this.type == 'bishop' || this.type == 'queen'){
+            // reduced the rows till a piece and flat to make 1 array witt cells
+           return this.moves.map(row => this.allowedRowMove(row)).flat();
         }
         else if(this.type == 'knight'){
             //check friendly fire
             return this.moves.map(cell => {return cell.piece?.color == this.otherColor || !cell.piece? cell : ''}).filter(n => n);
         }
         else if(this.type == 'pawn'){
-            //remove the strait if piece
             return this.moves
         }
         else if(this.type == 'king'){
             //todo test
             return this.moves.map(cell => {
-                return !this.attackcell(cell, true) && cell
+
+                if(cell.piece) return ''
+                else{
+                  return !this.grid[this.otherColor+'Pieces'].map(piece => piece.attackcell(cell)).includes(true) && cell
+                }
             }).filter(n => n);
         }
     }
+    
 
     allowedRowMove(row){
         //stop the row if encounter a piece then look if its fomr other player
+        let stop = 0
+        return row.map(cell =>{
+            if(stop == 0 && cell.piece){
+                stop++
+                //add cell if the blocker is a enemy
+              return  cell.piece.color == this.otherColor &&  cell
+            } 
+            return stop == 0? cell :  '';
+        }).filter(n => n);
     }
 
     get rookMoves(){
@@ -220,6 +233,10 @@ class ChessPiece extends HTMLElement{
         this.grid.getCell(this.x + 1, dir)?.color == this.otherColor && moves.push(this.grid.getCell(this.x + 1,dir));
         return moves;
     }
+    get pawnAttackMoves(){
+        const dir = this.color == 'white'? this.y - 1 : this.y + 1;
+        return [this.grid.getCell(this.x -1,dir),this.grid.getCell(this.x + 1,dir)]
+    }
 
     get kingMoves(){
         const moves = this.queenMoves.map(array => array[0]).filter(n => n);
@@ -230,8 +247,11 @@ class ChessPiece extends HTMLElement{
 
     attackcell(cell,king = false){
         //todo
-        //! 2 kings bugg
         // return true if it can attack the cell
+        if(this.type == 'pawn')return this.pawnAttackMoves.includes(cell)
+        //! 2 kings bugg imposivle
+        else if(this.type == 'king')return this.moves.includes(cell)
+        else return this.allowedMoves.includes(cell) 
     }
     
 }

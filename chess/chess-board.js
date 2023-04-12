@@ -43,7 +43,8 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
     //end grid getters
     //fen stuf
         get defaultFen(){
-            return 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0';
+            // return 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0';
+            return 'rnbqkbnr/8/8/8/8/8/8/RNBQKBNR w KQkq - 0 0'
         }
 
         get fen(){

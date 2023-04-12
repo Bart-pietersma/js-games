@@ -1,7 +1,7 @@
 :root{
     --square-size : 5em;
-    --square-color-1 : rgb(193, 230, 240);
-    --square-color-2 : rgb(62, 24, 14);
+    --square-color-1 : white;
+    --square-color-2 : black;
 }
 
 chess-grid{
