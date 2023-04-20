@@ -24,6 +24,12 @@ class ChessPiece extends HTMLElement{
             const type = this.pieceTypes[letter.toLowerCase()];
             type && this.toggleAttribute(type , true);
             team && this.toggleAttribute(team, true);
+            //make img
+            const img = document.createElement('img');
+            img.src = `./svg/${team}-${type}.svg`;
+            img.width = 80;
+            img.height = 80;
+            this.append(img);
         }
     }
 
@@ -39,6 +45,10 @@ class ChessPiece extends HTMLElement{
     }
     get grid() {
         return this.closestElement("chess-grid");
+    }
+
+    get board(){
+        return this.closestElement('chess-board');
     }
 
     get cell(){
@@ -227,15 +237,14 @@ class ChessPiece extends HTMLElement{
         this.color == 'black' && this.y == 1 && moves.length > 0 && moves.push(this.grid.getCell(this.x , dir +1));
         this.color == 'white' && this.y == 6 && moves.length > 0&& moves.push(this.grid.getCell(this.x , dir -1));
         // attack moves
-        //! problem for attackcell
-        //todo add enpassant (|| (this.getCell(stuf) == enpassantCell)
-        this.grid.getCell(this.x -1, dir)?.color == this.otherColor && moves.push(this.grid.getCell(this.x -1,dir));
-        this.grid.getCell(this.x + 1, dir)?.color == this.otherColor && moves.push(this.grid.getCell(this.x + 1,dir));
+        this.pawnAttackMoves.map(cell =>{
+           (cell.piece?.color == this.otherColor || cell == this.board.inPassing) &&  moves.push(cell);
+        });
         return moves;
     }
     get pawnAttackMoves(){
         const dir = this.color == 'white'? this.y - 1 : this.y + 1;
-        return [this.grid.getCell(this.x -1,dir),this.grid.getCell(this.x + 1,dir)]
+        return [this.grid.getCell(this.x -1,dir),this.grid.getCell(this.x + 1,dir)].filter(n => n)
     }
 
     get kingMoves(){
@@ -244,13 +253,16 @@ class ChessPiece extends HTMLElement{
         // add castling moves
         return moves
     }
+    get kingAttackMoves(){
+        return this.queenMoves.map(array => array[0]).filter(n => n)
+    }
 
     attackcell(cell,king = false){
         //todo
         // return true if it can attack the cell
         if(this.type == 'pawn')return this.pawnAttackMoves.includes(cell)
         //! 2 kings bugg imposivle
-        else if(this.type == 'king')return this.moves.includes(cell)
+        else if(this.type == 'king')return this.kingAttackMoves.includes(cell)
         else return this.allowedMoves.includes(cell) 
     }
     

@@ -17,6 +17,35 @@ class ChessGrid extends HTMLElement{
         this.append(...this.grid)
     }
 
+    showSelect(selectedArr){
+        const cells = selectedArr[0].allowedMoves
+        selectedArr[1].toggleAttribute('selected', true);
+        this.highlightCell(cells);
+    }
+
+    highlightCell(arr){
+        arr.map(cell =>{
+            const atribute = cell.piece || cell == this.board.inPassing ? 'attack' : 'move';
+            cell.toggleAttribute(atribute,true);
+        });
+    }
+    clearHighlight(){
+        Array.from(this.querySelectorAll('[attack]'))?.map(cell => cell.toggleAttribute('attack',false));
+        Array.from(this.querySelectorAll("[move]"))?.map(cell => cell.toggleAttribute('move',false));
+        this.querySelector('[selected]')?.toggleAttribute('selected',false);
+    }
+
+    closestElement(selector, el = this) {
+        return (
+            (el && el != document && el != window && el.closest(selector)) ||
+            this.closestElement(selector, el.getRootNode().host)
+        );
+    }
+
+    get board(){
+        return this.closestElement('chess-board');
+    }
+
     get columns(){
         const arr = [];
         for(let i=0 ; i < this.x ; i++)arr.push([]);

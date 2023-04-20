@@ -45,6 +45,10 @@ chess-board {
     background-color: gray;
 }
 
+.columnbar, .rowbar{
+    pointer-events: none;
+}
+
 /* aling grid */
 chess-grid{
     grid-column: 2;

@@ -3,18 +3,79 @@ import { importCss } from "./functions.js";
 import { ChessPlayer } from "./chess-player.js";
 import { ChessPiece } from "./chess-piece.js";
 
+//todo
+/*
+include board collor
+allow all movement until a color is asigned to board
+leave a way to walk for script input
+send a msg to api when a move has been send and board has coresponding atribute
+
+*/
+
 customElements.define('chess-board',class ChessBoard extends HTMLElement {
     constructor(){
         super()
         this.player1 = new ChessPlayer('white');
         this.player2 = new ChessPlayer('black');
+        this.selected = 0;
+        // this.socket = new WebSocket();
     }
     
     connectedCallback(){
         importCss('chess-board.css');
         this.constructBoard();
         this.fen = this.hasAttribute('fen')?  this.getAttribute('fen') : this.defaultFen ;
+
+        //click, touch and drag handlers
+        document.addEventListener('click', e => this.clickHandler(e));
+        this.addEventListener('contextmenu', e => this.rightClickHandler(e));
     }
+
+//interaction functions
+
+    clickHandler(e){
+        if(e.target.nodeName == 'CHESS-TILE' && e.pointerId == 1){
+            //we clicked in the gird
+            this.selected == 0? this.firstClick(e) : this.secondClick(e);
+
+        }else{
+            // cliked away 
+            this.clearSelected();
+        }
+    }
+
+    firstClick(e){
+            e.target.piece?.color[0] == this.turnColor && this.setSelected(e.target.piece);
+    }
+
+    secondClick(e){
+        console.log('second click');
+        if(e.target.moveType != false){
+            //move
+
+        }else{
+            this.clearSelected()
+            this.clickHandler(e);
+        }
+    }
+
+    rightClickHandler(e){
+        e.preventDefault();
+        this.clickHandler(e);
+    }
+
+    setSelected(piece){
+        this.selected = [piece,piece.cell];
+        this.gridNode.showSelect(this.selected);
+    }
+
+    clearSelected(){
+        console.log('clearselected');
+        this.gridNode.clearHighlight();
+        this.selected = 0;
+    }
+
+//end interaction funtcions
 
     //grid getters
         get gridNode(){
@@ -44,7 +105,7 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
     //fen stuf
         get defaultFen(){
             // return 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0';
-            return 'rnbqkbnr/8/8/8/8/8/8/RNBQKBNR w KQkq - 0 0'
+            return 'rnbqkbnr/p2ppppp/8/Pp6/8/2p5/1PPPPPPP/RNBQKBNR w KQkq b3 1 0'
         }
 
         get fen(){
@@ -52,7 +113,7 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
         }
 
         set fen(fen){
-            const [gridFen,playerFen,castlingFen,apFen,fulFen,halfFen] = fen.split(' ');
+            const [gridFen,turnColor,castlingFen,apFen,fulFen,halfFen] = fen.split(' ');
 
             //gridFen
             let count = 0;
@@ -69,6 +130,9 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
                 }
                });
             });
+
+            this.turnColor = turnColor;
+            this.inPassing = this.gridNode.getCell(apFen);
         }
 
         checkFen(fen){

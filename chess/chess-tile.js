@@ -19,6 +19,11 @@ class ChessTile extends HTMLElement{
         return this.querySelector('chess-piece');
     }
 
+    get moveType(){
+        // return move attack or false
+    return  this.hasAttribute('attack')? 'attack' : this.hasAttribute('move')? "move" : false;
+    }
+
     setBackgroundColor(){
         // if row and column are even color 1 and if row and culomn are odd color 1 else color 2
         this.style.backgroundColor = ((this.y +1) % 2 == 0 && (this.x + 1) % 2 == 0) || ((this.y +1) % 2 != 0 && (this.x + 1) % 2 != 0) ? 'var(--square-color-1)' : 'var(--square-color-2)';

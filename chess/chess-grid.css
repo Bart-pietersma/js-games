@@ -1,7 +1,7 @@
 :root{
     --square-size : 5em;
-    --square-color-1 : white;
-    --square-color-2 : black;
+    --square-color-1 : #ddd;
+    --square-color-2 : #444;
 }
 
 chess-grid{
@@ -20,4 +20,14 @@ chess-tile{
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+[selected]{
+    box-shadow: inset 0 0 calc(var(--square-size) * 0.5) #0d8cd6;
+}
+[move]{
+    box-shadow: inset 0 0 calc(var(--square-size) * 0.5) #28e90e;
+}
+[attack]{
+    box-shadow: inset 0 0 calc(var(--square-size) * 0.5) #da1111;
 }

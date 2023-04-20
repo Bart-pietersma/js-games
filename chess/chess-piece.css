@@ -1,13 +1,18 @@
 chess-piece{
     width: inherit;
     height: inherit;
-    background-color: hotpink;
+    pointer-events: none;
+}
+
+chess-piece > img{
+    height: inherit;
+    width: inherit;
 }
 
 chess-piece[black]{
-    background-color: rgba(0, 0, 0, 0.8);
+
 }
 
 chess-piece[white]{
-    background-color: rgba(255, 255, 255, 0.8);
+
 }
