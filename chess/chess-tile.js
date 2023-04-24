@@ -14,6 +14,10 @@ class ChessTile extends HTMLElement{
         return JSON.parse(this.getAttribute('coord'));
     }
 
+    get chessCoord(){// ec e1 or g6
+        return String.fromCharCode(this.coord[0]+65).toLocaleLowerCase()+(this.coord[1]+1);
+    }
+
     get piece(){
         //todo
         return this.querySelector('chess-piece');

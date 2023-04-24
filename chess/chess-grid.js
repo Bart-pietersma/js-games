@@ -20,12 +20,13 @@ class ChessGrid extends HTMLElement{
     showSelect(selectedArr){
         const cells = selectedArr[0].allowedMoves
         selectedArr[1].toggleAttribute('selected', true);
-        this.highlightCell(cells);
+        this.highlightCell(cells, selectedArr[0]);
     }
 
-    highlightCell(arr){
+    highlightCell(arr, piece){
         arr.map(cell =>{
-            const atribute = cell.piece || cell == this.board.inPassing ? 'attack' : 'move';
+            //! more pawn things
+            const atribute = cell.piece || (cell == this.getCell(this.board.inPassing) && piece.type == 'pawn' )? 'attack' : 'move';
             cell.toggleAttribute(atribute,true);
         });
     }

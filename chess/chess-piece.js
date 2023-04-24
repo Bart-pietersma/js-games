@@ -234,11 +234,11 @@ class ChessPiece extends HTMLElement{
         const dir = this.color == 'white'? this.y - 1 : this.y + 1;
         const moves = this.grid.getCell(this.x, dir).piece == null? [this.grid.getCell(this.x, dir)] : [];
         //startmoves
-        this.color == 'black' && this.y == 1 && moves.length > 0 && moves.push(this.grid.getCell(this.x , dir +1));
-        this.color == 'white' && this.y == 6 && moves.length > 0&& moves.push(this.grid.getCell(this.x , dir -1));
+        this.color == 'black' && this.y == 1 && moves.length > 0 && !this.grid.getCell(this.x, dir+1).piece && moves.push(this.grid.getCell(this.x , dir +1));
+        this.color == 'white' && this.y == 6 && moves.length > 0 && !this.grid.getCell(this.x, dir-1).piece && moves.push(this.grid.getCell(this.x , dir -1));
         // attack moves
         this.pawnAttackMoves.map(cell =>{
-           (cell.piece?.color == this.otherColor || cell == this.board.inPassing) &&  moves.push(cell);
+           (cell.piece?.color == this.otherColor || cell == this.grid.getCell(this.board.inPassing)) &&  moves.push(cell);
         });
         return moves;
     }

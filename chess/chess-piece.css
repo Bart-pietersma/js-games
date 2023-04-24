@@ -1,5 +1,5 @@
 chess-piece{
-    width: inherit;
+    width: var(--square-size);
     height: inherit;
     pointer-events: none;
 }

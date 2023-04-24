@@ -49,19 +49,21 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
     }
 
     secondClick(e){
-        console.log('second click');
         if(e.target.moveType != false){
             //move
+            this.moveHandler(e.target,this.selected[1],true);
 
         }else{
-            this.clearSelected()
+            this.clearSelected();
+            //go to clichandler to skip a click if another piece is selected
             this.clickHandler(e);
         }
     }
 
     rightClickHandler(e){
-        e.preventDefault();
-        this.clickHandler(e);
+        //make right click same as leftclick or holding for touch
+        // e.preventDefault();
+        // this.clickHandler(e);
     }
 
     setSelected(piece){
@@ -76,6 +78,51 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
     }
 
 //end interaction funtcions
+
+//movement functions
+
+moveHandler(toCell,fromCell,animate = false){
+    if(toCell.nodeName !=  "CHESS-TILE"){
+        toCell = this.gridNode.getCell(toCell);
+        fromCell = this.gridNode.getCell(fromCell);
+    }
+    const piece = fromCell.piece;
+    const moveType = toCell.moveType;
+    const move = fromCell.chessCoord+(moveType == 'move'? '-': 'x')+toCell.chessCoord;
+    console.log(move);
+
+    //move piece
+    this.movePiece(toCell,piece,animate);
+    this.clearSelected();
+
+    //update fen
+    this.updateFen(toCell,fromCell,piece);
+
+
+    //send to db?
+}
+
+movePiece(toCell,piece,animate){
+    if(toCell.moveType == "attack"){
+        //todo send piece to graveyard
+        this.querySelector(`#graveyard_${toCell.piece.color}`).append(toCell.piece);
+    }
+    toCell.append(piece);
+}
+
+updateFen(toCell,fromCell,piece){
+    //updatecastling
+    if(piece.type == 'rook' || piece.type == 'king'){
+        //todo reduce castling
+    }
+    //update inPassing if the move is even and piece = pawn get passing tile otherwise -
+    this.inPassing =  (toCell.y - fromCell.y) % 2 == 0 && piece.type == "pawn"? this.gridNode.getCell(toCell.x,fromCell.y +(toCell.y - fromCell.y)/2).chessCoord : '-';
+    //update turncollor
+    this.turnColor = this.othercolor;
+    //todo update fen atribute ?
+}
+
+// end movement functions
 
     //grid getters
         get gridNode(){
@@ -109,7 +156,7 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
         }
 
         get fen(){
-            return this.gridNode.gridFen
+            return this.gridNode.gridFen+' '+this.turnColor+' '+this.castlingFen+' '+this.inPassing;
         }
 
         set fen(fen){
@@ -132,7 +179,12 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
             });
 
             this.turnColor = turnColor;
-            this.inPassing = this.gridNode.getCell(apFen);
+            this.castlingFen = castlingFen;
+            this.inPassing = apFen;
+        }
+
+        get othercolor(){
+            return this.turnColor == 'w'? 'b' : 'w'; 
         }
 
         checkFen(fen){
@@ -145,6 +197,7 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
             //make board grid and border
             this.append(new ChessGrid);
             this.append(...this.makeBorder());
+            this.append(this.makeGraveyard());
             
             //todo
             //make moves log earya and graveyard
@@ -152,7 +205,6 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
         }  
         makeBorder(){
             const arr = [];
-
             for(let i = 0; i < 4; i++){
                 const div = document.createElement('div');
                 if(i % 2){
@@ -177,6 +229,16 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
                 arr.push(div);
             }
             return arr;
+        }
+        makeGraveyard(){
+            const div1 = document.createElement('div');
+            const div2 = document.createElement('div');
+            div1.id = 'graveyard_white';
+            div2.id = 'graveyard_black';
+            const div3 = document.createElement('div');
+            div3.id = 'graveyards';
+            div3.append(...[div1,div2]);
+            return div3;
         }
     //end board creation
 
