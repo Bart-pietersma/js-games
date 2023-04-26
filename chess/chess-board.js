@@ -51,7 +51,7 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
     secondClick(e){
         if(e.target.moveType != false){
             //move
-            this.moveHandler(e.target,this.selected[1],true);
+            this.moveHandler(e.target,this.selected[1],'click');
 
         }else{
             this.clearSelected();
@@ -81,33 +81,49 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
 
 //movement functions
 
-moveHandler(toCell,fromCell,animate = false){
+moveHandler(toCell,fromCell,type = false){
     if(toCell.nodeName !=  "CHESS-TILE"){
         toCell = this.gridNode.getCell(toCell);
         fromCell = this.gridNode.getCell(fromCell);
     }
-    const piece = fromCell.piece;
+    const piece = this.selected[0];
     const moveType = toCell.moveType;
-    const move = fromCell.chessCoord+(moveType == 'move'? '-': 'x')+toCell.chessCoord;
+    const move = fromCell.chessCoord+(moveType == 'move'? ' - ': ' x ')+toCell.chessCoord;
     console.log(move);
 
     //move piece
-    this.movePiece(toCell,piece,animate);
+    this.movePiece(toCell,piece,(type == 'click'? true: false));
     this.clearSelected();
+    this.updateLog(move);
 
     //update fen
     this.updateFen(toCell,fromCell,piece);
 
 
     //send to db?
+    if(type != 'db'){
+        //send move
+    }
 }
 
 movePiece(toCell,piece,animate){
     if(toCell.moveType == "attack"){
-        //todo send piece to graveyard
-        this.querySelector(`#graveyard_${toCell.piece.color}`).append(toCell.piece);
+        //send piece to graveyard
+        this[`${toCell.piece.color}graveyard`].append(toCell.piece);
     }
+    animate? this.animatePiece(toCell,piece) : toCell.append(piece);
+}
+
+animatePiece(toCell,piece){
+    //todo animate
+    console.log('animate');
     toCell.append(piece);
+}
+
+updateLog(move){
+    const p = document.createElement('li');
+    p.innerText = move;
+    this.movelog.append(p);
 }
 
 updateFen(toCell,fromCell,piece){
@@ -123,6 +139,16 @@ updateFen(toCell,fromCell,piece){
 }
 
 // end movement functions
+
+    get movelog(){
+        return this.querySelector(`#movelog`);
+    }
+    get blackgraveyard(){
+        return this.querySelector(`#graveyard_black`);
+    }
+    get whitegraveyard(){
+        return this.querySelector(`#graveyard_white`);
+    }
 
     //grid getters
         get gridNode(){
@@ -198,6 +224,7 @@ updateFen(toCell,fromCell,piece){
             this.append(new ChessGrid);
             this.append(...this.makeBorder());
             this.append(this.makeGraveyard());
+            this.append(this.makeMoveLog());
             
             //todo
             //make moves log earya and graveyard
@@ -239,6 +266,11 @@ updateFen(toCell,fromCell,piece){
             div3.id = 'graveyards';
             div3.append(...[div1,div2]);
             return div3;
+        }
+        makeMoveLog(){
+            const div = document.createElement(`ol`);
+            div.id = 'movelog';
+            return div;
         }
     //end board creation
 

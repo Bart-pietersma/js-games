@@ -96,12 +96,25 @@ class ChessPiece extends HTMLElement{
         return ['black','white'];
     }
 
+    get defendingKing(){
+        //returns cells if moving this 
+       const dir = this.grid[`${this.color}King`].queenMoves.map(dir => {return dir.includes(this.cell)? dir : ''}).filter(n => n)[0]
+       if(dir.length > 0){
+            //check friendlys
+            return dir.map(cell =>{return cell.piece?.color == this.color && cell != this.cell? true : false}).some(x => x == true)? false :
+            //check enemy that could attack king
+             dir.map(cell =>{return cell.piece?.color == this.otherColor && (cell.piece?.type == 'rook' || cell.piece?.type == 'bishop'|| cell.piece?.type == 'queen') && cell.piece?.moves.flat().includes(this.grid[`${this.color}King`].cell) ? true : false;}).some(x => x == true)? dir : false;
+       }else return false
+    }
+
+
     get moves(){
         // look at type and give back its moves
         return this[this.type+'Moves'];
     }
 
     get allowedMoves(){
+        //todo reduce for defendking thing
         //looks at the moves and check ec dont go over pieces cant move in a direction that alowes the king to be taken
         if(this.type == 'rook' || this.type == 'bishop' || this.type == 'queen'){
             // reduced the rows till a piece and flat to make 1 array witt cells

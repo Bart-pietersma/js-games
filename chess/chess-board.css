@@ -17,6 +17,19 @@ chess-board {
     user-select: none;
 }
 
+#movelog{
+    width: calc(var(--square-size) * 4);
+    height: -webkit-fill-available;
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    padding: 0;
+    justify-items: start;
+}
+
+#movelog > li{
+    margin-inline-start: 30px;
+}
+
 #graveyards{
     display: flex;
     flex-direction: column;
@@ -28,6 +41,7 @@ chess-board {
 #graveyard_black,#graveyard_white{
     display: flex;
     flex-wrap: wrap;
+    flex-direction: row-reverse;
 }
 
 .columnbar{
@@ -89,5 +103,9 @@ chess-grid{
 
 .rowbar ~ .rowbar{
     grid-column: 4;
+}
+#movelog{
+    grid-row: 2;
+    grid-column: 5;
 }
 /* end align grid */

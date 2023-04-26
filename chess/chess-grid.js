@@ -68,9 +68,15 @@ class ChessGrid extends HTMLElement{
     get blackPieces(){
         return Array.from(this.querySelectorAll(`[black]`));
     }
+    get blackKing(){
+        return this.querySelector(`[black][king]`);
+    }
 
     get whitePieces(){
         return Array.from(this.querySelectorAll(`[white]`));
+    }
+    get whiteKing(){
+        return this.querySelector(`[white][king]`);
     }
 
     getCell(x = 0,y = 0){
