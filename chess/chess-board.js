@@ -87,37 +87,72 @@ moveHandler(toCell,fromCell,type = false){
         fromCell = this.gridNode.getCell(fromCell);
     }
     const piece = this.selected[0];
-    const moveType = toCell.moveType;
-    const move = fromCell.chessCoord+(moveType == 'move'? ' - ': ' x ')+toCell.chessCoord;
-    console.log(move);
-
     //move piece
-    this.movePiece(toCell,piece,(type == 'click'? true: false));
+    const move = piece.type == 'king' && (toCell.x - fromCell.x) % 2 == 0? this.castlingMove(toCell,fromCell,piece,type) : this.normalMove(toCell,fromCell,piece,type);
+    
     this.clearSelected();
     this.updateLog(move);
 
     //update fen
     this.updateFen(toCell,fromCell,piece);
 
+    //check win ?
+    this.checkCheckMate();
+
 
     //send to db?
     if(type != 'db'){
         //send move
+        //todo
     }
+}
+
+normalMove(toCell,fromCell,piece,type){
+    this.movePiece(toCell,piece,(type == 'click'? true: false));
+    return  fromCell.chessCoord+(toCell.moveType == 'move'? ' - ': ' x ')+toCell.chessCoord;
+}
+castlingMove(toCell,fromCell,piece,type){
+    this.movePiece(toCell,piece,(type == 'click'? true:false));
+    const rook = toCell.x - fromCell.x <0? this.gridNode.getCell([0,piece.y]).piece : this.gridNode.getCell([7,piece.y]).piece ;
+    this.movePiece(this.gridNode.getCell(toCell.x -(toCell.x - fromCell.x)/2,fromCell.y) ,rook,(type == 'click'? true:false));
+    return toCell.x - fromCell.x <0 ? 'o-o-o' : 'o-o';
 }
 
 movePiece(toCell,piece,animate){
     if(toCell.moveType == "attack"){
         //send piece to graveyard
-        this[`${toCell.piece.color}graveyard`].append(toCell.piece);
+        setTimeout(() => {
+            console.log('move panw time');
+            this.animatePiece(this[`${toCell.piece.color}graveyard`],toCell.piece);
+        },);
     }
     animate? this.animatePiece(toCell,piece) : toCell.append(piece);
 }
 
-animatePiece(toCell,piece){
+animatePiece(to,piece){
     //todo animate
-    console.log('animate');
-    toCell.append(piece);
+    const from = piece.cell
+     //get cords where the cards is
+     const [x0, y0] = [piece.getBoundingClientRect().x, piece.getBoundingClientRect().y];
+     //get cords where the cards has to go
+     to.append(piece);
+     const [x1, y1] = [piece.getBoundingClientRect().x, piece.getBoundingClientRect().y];
+     from.append(piece);
+     // calcutlate distanse and using that to get a time so cards move at a constant speed 
+     const distanse = Math.sqrt(Math.pow(Math.abs(x0 - x1), 2) + Math.pow(Math.abs(y0 - y1), 2));
+     const duration = 350;
+     
+
+
+     piece.animate(
+         [{ zIndex: 1, transform: `translate(${x0 - x1}px,${y0 - y1}px)` }, { zIndex: 1, transform: `translate(0)` }],
+         {
+             duration: duration,
+             easing: "linear",
+         }
+     );
+     //when animation finishd apend to new cardpile
+     to.append(piece);
 }
 
 updateLog(move){
@@ -129,16 +164,38 @@ updateLog(move){
 updateFen(toCell,fromCell,piece){
     //updatecastling
     if(piece.type == 'rook' || piece.type == 'king'){
-        //todo reduce castling
+        if(piece.type == 'rook'){
+            const letter = fromCell.x == 0? piece.color == 'white'? "Q" : "q"  : fromCell.x == 7? piece.color == 'white'? 'K' : 'k' : false ;
+           this.castlingFen = this.castlingFen.replace(letter ,'');
+        }
+        else if(piece.type == 'king'){
+            if(piece.color == 'white' && fromCell == this.gridNode.getCell('e8')){
+                this.castlingFen = this.castlingFen.replace('Q','');
+                this.castlingFen = this.castlingFen.replace('K','');
+            }
+            else if (piece.color == 'black' && fromCell == this.gridNode.getCell('e1') ){
+                this.castlingFen = this.castlingFen.replace('q','');
+                this.castlingFen = this.castlingFen.replace('k','');
+            }
+        }
+        if(this.castlingFen.length == 0)this.castlingFen = '-';
     }
     //update inPassing if the move is even and piece = pawn get passing tile otherwise -
     this.inPassing =  (toCell.y - fromCell.y) % 2 == 0 && piece.type == "pawn"? this.gridNode.getCell(toCell.x,fromCell.y +(toCell.y - fromCell.y)/2).chessCoord : '-';
     //update turncollor
     this.turnColor = this.othercolor;
-    //todo update fen atribute ?
+    // update fen atribute ?
+    this.setAttribute('fen',this.fen);
 }
 
 // end movement functions
+//check win stuf
+
+checkCheckMate(){
+    //todo
+}
+
+//end check win stuf
 
     get movelog(){
         return this.querySelector(`#movelog`);
@@ -178,7 +235,7 @@ updateFen(toCell,fromCell,piece){
     //fen stuf
         get defaultFen(){
             // return 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0';
-            return 'rnbqkbnr/p2ppppp/8/Pp6/8/2p5/1PPPPPPP/RNBQKBNR w KQkq b3 1 0'
+            return 'r3k2r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 1 0'
         }
 
         get fen(){
@@ -194,7 +251,6 @@ updateFen(toCell,fromCell,piece){
                Array.from(row).map(letter =>{
                 if (letter != +letter){
                     // we have a piece
-                    //todo place piece
                     this.grid[count].append(new ChessPiece(letter));
                     count ++;
                 }
@@ -223,11 +279,9 @@ updateFen(toCell,fromCell,piece){
             //make board grid and border
             this.append(new ChessGrid);
             this.append(...this.makeBorder());
+            //make moves log earya and graveyard
             this.append(this.makeGraveyard());
             this.append(this.makeMoveLog());
-            
-            //todo
-            //make moves log earya and graveyard
 
         }  
         makeBorder(){

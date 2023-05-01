@@ -18,7 +18,7 @@ class ChessGrid extends HTMLElement{
     }
 
     showSelect(selectedArr){
-        const cells = selectedArr[0].allowedMoves
+        const cells = selectedArr[0].finalMoves
         selectedArr[1].toggleAttribute('selected', true);
         this.highlightCell(cells, selectedArr[0]);
     }

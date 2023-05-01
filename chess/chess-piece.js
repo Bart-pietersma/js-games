@@ -99,12 +99,17 @@ class ChessPiece extends HTMLElement{
     get defendingKing(){
         //returns cells if moving this 
        const dir = this.grid[`${this.color}King`].queenMoves.map(dir => {return dir.includes(this.cell)? dir : ''}).filter(n => n)[0]
-       if(dir.length > 0){
+       if(dir?.length > 0){
             //check friendlys
             return dir.map(cell =>{return cell.piece?.color == this.color && cell != this.cell? true : false}).some(x => x == true)? false :
             //check enemy that could attack king
              dir.map(cell =>{return cell.piece?.color == this.otherColor && (cell.piece?.type == 'rook' || cell.piece?.type == 'bishop'|| cell.piece?.type == 'queen') && cell.piece?.moves.flat().includes(this.grid[`${this.color}King`].cell) ? true : false;}).some(x => x == true)? dir : false;
        }else return false
+    }
+
+    get finalMoves(){
+        //reduces allowedmoves if its defending the king
+        return this.defendingKing? this.allowedMoves.map(cell => {return this.defendingKing.includes(cell)? cell : ''}).filter(n =>n): this.allowedMoves;
     }
 
 
@@ -114,7 +119,6 @@ class ChessPiece extends HTMLElement{
     }
 
     get allowedMoves(){
-        //todo reduce for defendking thing
         //looks at the moves and check ec dont go over pieces cant move in a direction that alowes the king to be taken
         if(this.type == 'rook' || this.type == 'bishop' || this.type == 'queen'){
             // reduced the rows till a piece and flat to make 1 array witt cells
@@ -263,7 +267,24 @@ class ChessPiece extends HTMLElement{
     get kingMoves(){
         const moves = this.queenMoves.map(array => array[0]).filter(n => n);
         //todo check castling
+        //Castling is permitted only if neither the king nor the rook has previously moved; the squares between the king and the rook are vacant; and the king does not leave, cross over, or finish on a square attacked by an enemy piece.
         // add castling moves
+        this.color == 'white'? 'uppercase' : 'lowercase';
+        //queenSide
+        if(this.board.castlingFen.includes(this.color == 'white'? 'Q' : 'q')){
+            const cells = this.grid.getCells([[this.x -1,this.y],[this.x-2,this.y]]);
+            cells.map(cell => {
+               return !cell.piece && !this.grid[this.otherColor+'Pieces'].map(piece => piece.attackcell(cell)).includes(true)
+            }).every(x => x == true) && this.grid.getCell([this.x-3,this.y]).piece == null && moves.push(cells[1]);
+        }
+        //kingSide
+        if(this.board.castlingFen.includes(this.color == 'white'? 'K' : 'k')){
+            const cells = this.grid.getCells([[this.x +1,this.y],[this.x+2,this.y]]);
+            cells.map(cell => {
+               return !cell.piece && !this.grid[this.otherColor+'Pieces'].map(piece => piece.attackcell(cell)).includes(true)
+            }).every(x => x == true) && moves.push(cells[1]);
+        }
+
         return moves
     }
     get kingAttackMoves(){
