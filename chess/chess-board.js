@@ -5,7 +5,7 @@ import { ChessPiece } from "./chess-piece.js";
 
 //todo
 /*
-include board collor
+include board color
 allow all movement until a color is asigned to board
 leave a way to walk for script input
 send a msg to api when a move has been send and board has coresponding atribute
@@ -88,7 +88,7 @@ moveHandler(toCell,fromCell,type = false){
     }
     const piece = this.selected[0];
     //move piece
-    const move = piece.type == 'king' && (toCell.x - fromCell.x) % 2 == 0? this.castlingMove(toCell,fromCell,piece,type) : this.normalMove(toCell,fromCell,piece,type);
+    const move = piece.type == 'king' && (toCell.x - fromCell.x) % 2 == 0 && toCell.y == fromCell.y? this.castlingMove(toCell,fromCell,piece,type) : this.normalMove(toCell,fromCell,piece,type);
     
     this.clearSelected();
     this.updateLog(move);
@@ -121,10 +121,18 @@ castlingMove(toCell,fromCell,piece,type){
 movePiece(toCell,piece,animate){
     if(toCell.moveType == "attack"){
         //send piece to graveyard
-        setTimeout(() => {
-            console.log('move panw time');
-            this.animatePiece(this[`${toCell.piece.color}graveyard`],toCell.piece);
-        },);
+        //check inpassing move
+        if(toCell == this.gridNode.getCell(this.inPassing) && piece.type == 'pawn'){
+                const y = piece.color == 'white'? 1 : -1;
+                const tile = this.gridNode.getCell(toCell.x,toCell.y + y);
+                setTimeout(() => {
+                    this.animatePiece(this[`${tile.piece.color}graveyard`],tile.piece);
+                },);
+        }else{
+            setTimeout(() => {
+                this.animatePiece(this[`${toCell.piece.color}graveyard`],toCell.piece);
+            },);
+        }
     }
     animate? this.animatePiece(toCell,piece) : toCell.append(piece);
 }
@@ -182,7 +190,7 @@ updateFen(toCell,fromCell,piece){
     }
     //update inPassing if the move is even and piece = pawn get passing tile otherwise -
     this.inPassing =  (toCell.y - fromCell.y) % 2 == 0 && piece.type == "pawn"? this.gridNode.getCell(toCell.x,fromCell.y +(toCell.y - fromCell.y)/2).chessCoord : '-';
-    //update turncollor
+    //update turncolor
     this.turnColor = this.othercolor;
     // update fen atribute ?
     this.setAttribute('fen',this.fen);
@@ -193,6 +201,7 @@ updateFen(toCell,fromCell,piece){
 
 checkCheckMate(){
     //todo
+    //this.gridNode.inCheck &&  all pieces.finalmoves.lengt == 0 //u loose
 }
 
 //end check win stuf
@@ -235,7 +244,8 @@ checkCheckMate(){
     //fen stuf
         get defaultFen(){
             // return 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0';
-            return 'r3k2r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 1 0'
+            // return '8/p7/8/1n6/k7/8/8/R6K b - - 1 0'
+            return '1r6/n7/8/kQ6/8/2N5/8/7K b - -'
         }
 
         get fen(){

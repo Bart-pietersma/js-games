@@ -109,7 +109,11 @@ class ChessPiece extends HTMLElement{
 
     get finalMoves(){
         //reduces allowedmoves if its defending the king
-        return this.defendingKing? this.allowedMoves.map(cell => {return this.defendingKing.includes(cell)? cell : ''}).filter(n =>n): this.allowedMoves;
+        return this.defendingKing? this.allowedMoves.map(cell => {return this.defendingKing.includes(cell)? cell : ''}).filter(n =>n): this.grid.inCheck? this.counterMoves : this.allowedMoves;
+    }
+
+    get counterMoves(){
+       return this.type != 'king'? this.allowedMoves.map(cell => {return this.grid.counterInCheckMoves.includes(cell)? cell : ''}).filter(n =>n): this.allowedMoves;
     }
 
 
@@ -125,21 +129,27 @@ class ChessPiece extends HTMLElement{
            return this.moves.map(row => this.allowedRowMove(row)).flat();
         }
         else if(this.type == 'knight'){
-            //check friendly fire
-            return this.moves.map(cell => {return cell.piece?.color == this.otherColor || !cell.piece? cell : ''}).filter(n => n);
+            //of the board is already done
+            return this.moves
         }
         else if(this.type == 'pawn'){
             return this.moves
         }
         else if(this.type == 'king'){
             //todo test
-            return this.moves.map(cell => {
-
-                if(cell.piece) return ''
+            //we move the king of board then see if the tiles are attackble put king back and return the alowed moves
+            const moves = this.moves;
+            const cell = this.cell;
+            const grid = this.grid;
+            this.board.append(this);
+            const allowedMoves = moves.map(cell => {
+                if(cell.piece?.color == this.color) return ''
                 else{
-                  return !this.grid[this.otherColor+'Pieces'].map(piece => piece.attackcell(cell)).includes(true) && cell
+                  return !grid[this.otherColor+'Pieces'].map(piece => piece.attackcell(cell)).includes(true) && cell
                 }
             }).filter(n => n);
+            cell.append(this);
+            return allowedMoves;
         }
     }
     
@@ -151,7 +161,7 @@ class ChessPiece extends HTMLElement{
             if(stop == 0 && cell.piece){
                 stop++
                 //add cell if the blocker is a enemy
-              return  cell.piece.color == this.otherColor &&  cell
+              return    cell
             } 
             return stop == 0? cell :  '';
         }).filter(n => n);
@@ -255,7 +265,7 @@ class ChessPiece extends HTMLElement{
         this.color == 'white' && this.y == 6 && moves.length > 0 && !this.grid.getCell(this.x, dir-1).piece && moves.push(this.grid.getCell(this.x , dir -1));
         // attack moves
         this.pawnAttackMoves.map(cell =>{
-           (cell.piece?.color == this.otherColor || cell == this.grid.getCell(this.board.inPassing)) &&  moves.push(cell);
+           (cell.piece || cell == this.grid.getCell(this.board.inPassing)) &&  moves.push(cell);
         });
         return moves;
     }

@@ -26,13 +26,16 @@ class ChessGrid extends HTMLElement{
     highlightCell(arr, piece){
         arr.map(cell =>{
             //! more pawn things
-            const atribute = cell.piece || (cell == this.getCell(this.board.inPassing) && piece.type == 'pawn' )? 'attack' : 'move';
+            
+            const atribute = cell.piece || (cell == this.getCell(this.board.inPassing) && piece.type == 'pawn' )? cell.piece?.color == piece.color? 'defend' : 'attack' : 'move';
             cell.toggleAttribute(atribute,true);
         });
     }
     clearHighlight(){
-        Array.from(this.querySelectorAll('[attack]'))?.map(cell => cell.toggleAttribute('attack',false));
-        Array.from(this.querySelectorAll("[move]"))?.map(cell => cell.toggleAttribute('move',false));
+        const atributes = ['attack','defend','move'];
+        atributes.map(atribute =>  Array.from(this.querySelectorAll(`[${atribute}]`))?.map(cell => cell.toggleAttribute(atribute,false)));
+        // Array.from(this.querySelectorAll('[attack]'))?.map(cell => cell.toggleAttribute('attack',false));
+        // Array.from(this.querySelectorAll("[move]"))?.map(cell => cell.toggleAttribute('move',false));
         this.querySelector('[selected]')?.toggleAttribute('selected',false);
     }
 
@@ -77,6 +80,37 @@ class ChessGrid extends HTMLElement{
     }
     get whiteKing(){
         return this.querySelector(`[white][king]`);
+    }
+
+    get inCheck(){
+        //returns true false if king in check
+        const color = this.board.turnColor == 'w'? 'white' : 'black';
+        const otherColor = color == 'white'? 'black' : 'white';
+        return this[`${otherColor}Pieces`].map(piece => piece.attackcell(this[`${color}King`].cell)).includes(true);
+    }
+
+    get counterInCheckMoves(){
+        //get piece(s) that attack the king
+        if(this.inCheck){
+            const color = this.board.turnColor == 'w'? 'white' : 'black';
+            const otherColor = this.color == 'white'? 'black' : 'white';
+            const pieces = this[`${otherColor}Pieces`].map(piece => {return piece.attackcell(this[`${color}King`].cell) && piece}).filter(n => n);
+            //can only make a counter move for other pieces if there's only 1 attacker
+            const piece = pieces.length == 1? pieces[0]: null;
+            if(piece){
+                const cells = [piece.cell];
+                if(piece.type == 'rook' || piece.type == 'bishop' || piece.type == 'queen'){
+                    //get the attacking row and push these
+                    const moves = piece.moves.map(row => {
+                        const reducedRow = piece.allowedRowMove(row);
+                        return reducedRow.pop() == this[`${color}King`].cell? reducedRow : false;
+                    }).flat().filter(n => n);
+                    cells.push(...moves);
+                }
+                return cells // array of cells that !king pieces can move to 
+            }
+        }
+        return false;
     }
 
     getCell(x = 0,y = 0){
