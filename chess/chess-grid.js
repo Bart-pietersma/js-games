@@ -93,7 +93,7 @@ class ChessGrid extends HTMLElement{
         //get piece(s) that attack the king
         if(this.inCheck){
             const color = this.board.turnColor == 'w'? 'white' : 'black';
-            const otherColor = this.color == 'white'? 'black' : 'white';
+            const otherColor = color == 'white'? 'black' : 'white';
             const pieces = this[`${otherColor}Pieces`].map(piece => {return piece.attackcell(this[`${color}King`].cell) && piece}).filter(n => n);
             //can only make a counter move for other pieces if there's only 1 attacker
             const piece = pieces.length == 1? pieces[0]: null;
@@ -110,7 +110,8 @@ class ChessGrid extends HTMLElement{
                 return cells // array of cells that !king pieces can move to 
             }
         }
-        return false;
+        // no countermoves aveble
+        return [];
     }
 
     getCell(x = 0,y = 0){

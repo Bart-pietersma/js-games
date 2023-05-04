@@ -109,7 +109,7 @@ class ChessPiece extends HTMLElement{
 
     get finalMoves(){
         //reduces allowedmoves if its defending the king
-        return this.defendingKing? this.allowedMoves.map(cell => {return this.defendingKing.includes(cell)? cell : ''}).filter(n =>n): this.grid.inCheck? this.counterMoves : this.allowedMoves;
+        return this.defendingKing? this.grid.inCheck? [] :  this.allowedMoves.map(cell => {return this.defendingKing.includes(cell)? cell : ''}).filter(n =>n): this.grid.inCheck? this.counterMoves : this.allowedMoves;
     }
 
     get counterMoves(){
@@ -305,7 +305,6 @@ class ChessPiece extends HTMLElement{
         //todo
         // return true if it can attack the cell
         if(this.type == 'pawn')return this.pawnAttackMoves.includes(cell)
-        //! 2 kings bugg imposivle
         else if(this.type == 'king')return this.kingAttackMoves.includes(cell)
         else return this.allowedMoves.includes(cell) 
     }

@@ -2,6 +2,7 @@ import { ChessGrid } from "./chess-grid.js";
 import { importCss } from "./functions.js";
 import { ChessPlayer } from "./chess-player.js";
 import { ChessPiece } from "./chess-piece.js";
+import {promotionMenu} from "./promotionMenu.js";
 
 //todo
 /*
@@ -86,18 +87,21 @@ moveHandler(toCell,fromCell,type = false){
         toCell = this.gridNode.getCell(toCell);
         fromCell = this.gridNode.getCell(fromCell);
     }
-    const piece = this.selected[0];
+    const piece = type == 'drag' || type == 'touch'? this.selected[0] : fromCell.piece;
     //move piece
     const move = piece.type == 'king' && (toCell.x - fromCell.x) % 2 == 0 && toCell.y == fromCell.y? this.castlingMove(toCell,fromCell,piece,type) : this.normalMove(toCell,fromCell,piece,type);
-    
     this.clearSelected();
+
+    //check promotion
+    piece.type == 'pawn' && ( this.rows[0].includes(toCell) || this.rows[this.rowCount -1].includes(toCell) ) && this.pawnPromotion(toCell);
+
     this.updateLog(move);
 
     //update fen
     this.updateFen(toCell,fromCell,piece);
 
     //check win ?
-    this.checkCheckMate();
+    this.checkWin();
 
 
     //send to db?
@@ -108,17 +112,17 @@ moveHandler(toCell,fromCell,type = false){
 }
 
 normalMove(toCell,fromCell,piece,type){
-    this.movePiece(toCell,piece,(type == 'click'? true: false));
+    this.movePiece(toCell,piece,type);
     return  fromCell.chessCoord+(toCell.moveType == 'move'? ' - ': ' x ')+toCell.chessCoord;
 }
 castlingMove(toCell,fromCell,piece,type){
-    this.movePiece(toCell,piece,(type == 'click'? true:false));
+    this.movePiece(toCell,piece,type);
     const rook = toCell.x - fromCell.x <0? this.gridNode.getCell([0,piece.y]).piece : this.gridNode.getCell([7,piece.y]).piece ;
-    this.movePiece(this.gridNode.getCell(toCell.x -(toCell.x - fromCell.x)/2,fromCell.y) ,rook,(type == 'click'? true:false));
+    this.movePiece(this.gridNode.getCell(toCell.x -(toCell.x - fromCell.x)/2,fromCell.y) ,rook,'db');
     return toCell.x - fromCell.x <0 ? 'o-o-o' : 'o-o';
 }
 
-movePiece(toCell,piece,animate){
+movePiece(toCell,piece,type){
     if(toCell.moveType == "attack"){
         //send piece to graveyard
         //check inpassing move
@@ -134,7 +138,7 @@ movePiece(toCell,piece,animate){
             },);
         }
     }
-    animate? this.animatePiece(toCell,piece) : toCell.append(piece);
+    type == 'click' || type == 'db'? this.animatePiece(toCell,piece) : toCell.append(piece);
 }
 
 animatePiece(to,piece){
@@ -161,6 +165,31 @@ animatePiece(to,piece){
      );
      //when animation finishd apend to new cardpile
      to.append(piece);
+}
+
+pawnPromotion(toCell){
+    console.log('pawnpromote');
+    //show promotion menu
+    this.append(new promotionMenu);
+    //get the data back
+    // const piece = await this.menupicker();
+
+    //replace pawn
+
+
+}
+
+promotionPick(){
+    const type = this.promotionOption;
+    console.log(type);
+}
+
+get promotionOption(){
+    return this.querySelector(`input:checked`).value
+}
+
+get promotionMenu(){
+    return this.querySelector(`#promotionmenu`);
 }
 
 updateLog(move){
@@ -199,10 +228,22 @@ updateFen(toCell,fromCell,piece){
 // end movement functions
 //check win stuf
 
-checkCheckMate(){
-    //todo
-    //this.gridNode.inCheck &&  all pieces.finalmoves.lengt == 0 //u loose
-}
+    get checkCheckMate(){
+        //check if its inCheck and all the pieces cant move
+    return this.gridNode.inCheck && this.gridNode[`${this.color}Pieces`].map(piece => {return piece.finalMoves.length}).every((x) => x == 0);
+    }
+
+    get checkStaleMate(){
+        return (!this.gridNode.inCheck && this.gridNode[`${this.color}Pieces`].map(piece => {return piece.finalMoves.length}).every((x) => x == 0)) || Array.from(this.gridNode.querySelectorAll(`chess-piece`)).length == 2 ;
+    }
+
+    checkWin(){
+        return this.checkCheckMate? this.color =='white'? 'black' : 'white' : this.checkStaleMate? 'draw' : false;
+    }
+
+    HandleWin(color){
+        // white black draw
+    }
 
 //end check win stuf
 
@@ -214,6 +255,10 @@ checkCheckMate(){
     }
     get whitegraveyard(){
         return this.querySelector(`#graveyard_white`);
+    }
+
+    get color(){
+        return this.turnColor == 'w'? 'white' : this.turnColor == 'b'? 'black' : false;
     }
 
     //grid getters
@@ -244,8 +289,8 @@ checkCheckMate(){
     //fen stuf
         get defaultFen(){
             // return 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0';
-            // return '8/p7/8/1n6/k7/8/8/R6K b - - 1 0'
-            return '1r6/n7/8/kQ6/8/2N5/8/7K b - -'
+            // return '8/8/1p6/kn4r1/8/8/r7/7K w - - 1 0'
+            return 'k7/3P4/8/8/8/8/8/7K w - -'
         }
 
         get fen(){
@@ -292,7 +337,6 @@ checkCheckMate(){
             //make moves log earya and graveyard
             this.append(this.makeGraveyard());
             this.append(this.makeMoveLog());
-
         }  
         makeBorder(){
             const arr = [];
