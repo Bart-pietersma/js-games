@@ -32,6 +32,10 @@ class ChessTile extends HTMLElement{
         // if row and column are even color 1 and if row and culomn are odd color 1 else color 2
         this.toggleAttribute((((this.y +1) % 2 == 0 && (this.x + 1) % 2 == 0) || ((this.y +1) % 2 != 0 && (this.x + 1) % 2 != 0) ? 'light' : 'dark') ,true)
     }
+
+    setDragable(){
+        this.draggable = this.piece? true : '';
+    }
 }
 customElements.define('chess-tile', ChessTile);
 

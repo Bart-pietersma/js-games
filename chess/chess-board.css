@@ -17,6 +17,19 @@ chess-board {
     user-select: none;
 }
 
+#dragdiv{
+    min-height: 0;
+    border: 0;
+    z-index: 10;
+    position: absolute;
+    pointer-events: none;
+    touch-action: none;
+}
+
+#dragdiv chess-piece{
+    pointer-events: none;
+}
+
 #movelog{
     width: calc(var(--square-size) * 4);
     height: -webkit-fill-available;
@@ -78,9 +91,8 @@ chess-board {
 
 /* aling grid */
 
-#graveyards{
-    grid-column: 1;
-    grid-row: 2;
+#chessboardwrapper{
+    display: grid;
 }
 
 chess-grid{
@@ -104,8 +116,5 @@ chess-grid{
 .rowbar ~ .rowbar{
     grid-column: 4;
 }
-#movelog{
-    grid-row: 2;
-    grid-column: 5;
-}
+
 /* end align grid */

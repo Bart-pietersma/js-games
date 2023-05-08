@@ -1,7 +1,9 @@
 import { importCss } from "./functions.js";
 class promotionMenu extends HTMLElement{
-    constructor(){
+    constructor(fromCell,toCell){
         super()
+        this.fromCell = fromCell;
+        this.toCell = toCell;
     }
 
     connectedCallback(){
@@ -9,6 +11,18 @@ class promotionMenu extends HTMLElement{
 
         this.setAttribute('promotion','queen,rook,bishop,knight');
         this.constructRadioButton(this.optionAttr);
+        this.constructButton()
+    }
+
+    closestElement(selector, el = this) {
+        return (
+            (el && el != document && el != window && el.closest(selector)) ||
+            this.closestElement(selector, el.getRootNode().host)
+        );
+    }
+
+    get board(){
+        return this.closestElement('chess-board');
     }
 
     get optionAttr(){
@@ -18,14 +32,13 @@ class promotionMenu extends HTMLElement{
     }
 
     constructRadioButton(attr){
-        console.log(attr.name);
         attr.value.split(",").map(value =>{
             const input = document.createElement("input")
             input.id = attr.name+value;
             input.type = "radio";
             input.name = attr.name;
             input.checked = value == 'queen'? true : false;
-            input.value = value;
+            input.value = value[0] == 'k'? 'n': value[0];
             this.append(input);
             const label = document.createElement('label');
             label.htmlFor = attr.name+value;
@@ -33,9 +46,19 @@ class promotionMenu extends HTMLElement{
             this.append(label);
         });
     }
+    constructButton(){
+        const input = document.createElement('input');
+        input.type = "button";
+        input.onclick = (e =>{this.buttonHandler()});
+        input.value = 'submit';
+        this.append(input);
+    }
 
-    //todo make Button
-
+    buttonHandler(){
+        const promotion = this.querySelector(`input:checked`).value
+        this.board.moveHandler(this.toCell,this.fromCell,'click',promotion)
+        this.remove();
+    }
 }
 customElements.define('promotion-menu', promotionMenu);
 export {promotionMenu};

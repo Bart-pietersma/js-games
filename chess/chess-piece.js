@@ -18,7 +18,6 @@ import { importCss } from "./functions.js";
 class ChessPiece extends HTMLElement{
     constructor(letter){
         super()
-        console.log();
         if(letter){
             const team = letter == letter.toUpperCase()? 'white' : 'black';
             const type = this.pieceTypes[letter.toLowerCase()];
@@ -35,6 +34,7 @@ class ChessPiece extends HTMLElement{
 
     connectedCallback(){
         importCss('chess-piece.css');
+        this.cell && this.cell.setDragable();
     }
 
     closestElement(selector, el = this) {
@@ -52,7 +52,8 @@ class ChessPiece extends HTMLElement{
     }
 
     get cell(){
-        return this.closestElement("chess-tile");
+        //to prefent a inf loop when a piece is not on the board
+        return this.parentElement != this.board? this.closestElement("chess-tile"): false;
     }
 
     get x(){

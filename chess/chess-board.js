@@ -3,6 +3,7 @@ import { importCss } from "./functions.js";
 import { ChessPlayer } from "./chess-player.js";
 import { ChessPiece } from "./chess-piece.js";
 import {promotionMenu} from "./promotionMenu.js";
+import { ChessTile } from "./chess-tile.js";
 
 //todo
 /*
@@ -19,7 +20,6 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
         this.player1 = new ChessPlayer('white');
         this.player2 = new ChessPlayer('black');
         this.selected = 0;
-        // this.socket = new WebSocket();
     }
     
     connectedCallback(){
@@ -28,12 +28,33 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
         this.fen = this.hasAttribute('fen')?  this.getAttribute('fen') : this.defaultFen ;
 
         //click, touch and drag handlers
+        this.setEventListners();
+    }
+    
+    //interaction functions
+    
+    setEventListners(){
+        //click
         document.addEventListener('click', e => this.clickHandler(e));
         this.addEventListener('contextmenu', e => this.rightClickHandler(e));
+
+        //drag
+        this.addEventListener("dragstart", (evt) => this.dragStartHandler(evt));
+        document.addEventListener("dragover", (evt) => this.onMouseMove(evt));
+        this.addEventListener("dragend", (evt) => this.dragEndHandler(evt));
+        this.addEventListener("drop", (evt) => this.dropHandler(evt))
+
+        //touch
+        this.addEventListener("touchstart", (evt) => this.touchStartHandler(evt));
+        document.addEventListener("touchmove", (evt) => this.onMouseMove(evt));
+        this.addEventListener("touchend", (evt) => this.touchEndHandler(evt));
+
+        //todo db?
+
     }
 
-//interaction functions
 
+    //click functions
     clickHandler(e){
         if(e.target.nodeName == 'CHESS-TILE' && e.pointerId == 1){
             //we clicked in the gird
@@ -41,7 +62,7 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
 
         }else{
             // cliked away 
-            this.clearSelected();
+            e.target.parentElement?.nodeName == `PROMOTION-MENU`? false : this.clearSelected();
         }
     }
 
@@ -66,6 +87,29 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
         // e.preventDefault();
         // this.clickHandler(e);
     }
+    //end click functions
+
+    //drag functions
+    //todo
+    dragStartHandler(e){
+        console.log(e.target);
+    }
+    dragEndHandler(e){
+
+    }
+    dropHandler(e){
+
+    }
+    //end dragfunctions
+    //touchfunctions
+    touchStartHandler(e){
+
+    }
+    touchEndHandler(e){
+
+    }
+
+    //endtouchfunctions
 
     setSelected(piece){
         this.selected = [piece,piece.cell];
@@ -78,42 +122,70 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
         this.selected = 0;
     }
 
+    onMouseMove(e) {
+        const mdiv = document.getElementById("dragdiv");
+        if (e.clientX) {
+            mdiv.style.left = `calc(${e.clientX}px - var(--xline))`;
+            mdiv.style.top = `calc(${e.clientY}px - var(--yline))`;
+        } else {
+            mdiv.style.left = `calc(${e.changedTouches[0].clientX}px - var(--xline))`;
+            mdiv.style.top = `calc(${e.changedTouches[0].clientY}px - var(--yline))`;
+        }
+        return false;
+    }
+
 //end interaction funtcions
 
 //movement functions
 
-moveHandler(toCell,fromCell,type = false){
+moveHandler(toCell,fromCell,type = false,promotion = false){
     if(toCell.nodeName !=  "CHESS-TILE"){
         toCell = this.gridNode.getCell(toCell);
         fromCell = this.gridNode.getCell(fromCell);
     }
     const piece = type == 'drag' || type == 'touch'? this.selected[0] : fromCell.piece;
     //move piece
-    const move = piece.type == 'king' && (toCell.x - fromCell.x) % 2 == 0 && toCell.y == fromCell.y? this.castlingMove(toCell,fromCell,piece,type) : this.normalMove(toCell,fromCell,piece,type);
-    this.clearSelected();
-
+    
     //check promotion
-    piece.type == 'pawn' && ( this.rows[0].includes(toCell) || this.rows[this.rowCount -1].includes(toCell) ) && this.pawnPromotion(toCell);
-
-    this.updateLog(move);
-
-    //update fen
-    this.updateFen(toCell,fromCell,piece);
-
-    //check win ?
-    this.checkWin();
-
-
-    //send to db?
-    if(type != 'db'){
-        //send move
-        //todo
+    if(piece.type == 'pawn' && !promotion && (this.rows[0].includes(toCell) || this.rows[this.rowCount -1].includes(toCell))){
+        this.pawnPromotion(fromCell,toCell);
+        
+    }else{
+        const move = piece.type == 'king' && (toCell.x - fromCell.x) % 2 == 0 && toCell.y == fromCell.y? this.castlingMove(toCell,fromCell,piece,type) : this.normalMove(toCell,fromCell,piece,type,promotion);
+        this.clearSelected();
+        this.updateLog(move);
+    
+        //update fen
+        this.updateFen(toCell,fromCell,piece);
+    
+        //check win ?
+        if(this.checkWin()){
+            const winner = '';//get color or stalemate
+            console.warn('we have a winner');
+            this.HandleWin(winner);
+        }
+    
+    
+        //send to db?
+        if(type != 'db'){
+            //send move
+            //todo
+        }
     }
+
 }
 
-normalMove(toCell,fromCell,piece,type){
+normalMove(toCell,fromCell,piece,type,promotion){
     this.movePiece(toCell,piece,type);
-    return  fromCell.chessCoord+(toCell.moveType == 'move'? ' - ': ' x ')+toCell.chessCoord;
+    let extraMoveBit = '';
+    if(promotion){
+        promotion = piece.color == "white"? promotion.toUpperCase() : promotion;
+        extraMoveBit = promotion
+        piece.remove();
+        const newPiece = new ChessPiece(promotion);
+        toCell.append(newPiece);
+    }
+    return  fromCell.chessCoord+(toCell.moveType == 'move'? ' - ': ' x ')+toCell.chessCoord+extraMoveBit;
 }
 castlingMove(toCell,fromCell,piece,type){
     this.movePiece(toCell,piece,type);
@@ -167,29 +239,10 @@ animatePiece(to,piece){
      to.append(piece);
 }
 
-pawnPromotion(toCell){
+pawnPromotion(fromCell,toCell){
     console.log('pawnpromote');
     //show promotion menu
-    this.append(new promotionMenu);
-    //get the data back
-    // const piece = await this.menupicker();
-
-    //replace pawn
-
-
-}
-
-promotionPick(){
-    const type = this.promotionOption;
-    console.log(type);
-}
-
-get promotionOption(){
-    return this.querySelector(`input:checked`).value
-}
-
-get promotionMenu(){
-    return this.querySelector(`#promotionmenu`);
+    this.append(new promotionMenu(fromCell,toCell));
 }
 
 updateLog(move){
@@ -257,6 +310,10 @@ updateFen(toCell,fromCell,piece){
         return this.querySelector(`#graveyard_white`);
     }
 
+    get dragdiv(){
+        return this.querySelector(`#dragdiv`);
+    }
+
     get color(){
         return this.turnColor == 'w'? 'white' : this.turnColor == 'b'? 'black' : false;
     }
@@ -288,9 +345,9 @@ updateFen(toCell,fromCell,piece){
     //end grid getters
     //fen stuf
         get defaultFen(){
-            // return 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0';
+            return 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0';
             // return '8/8/1p6/kn4r1/8/8/r7/7K w - - 1 0'
-            return 'k7/3P4/8/8/8/8/8/7K w - -'
+            // return 'k7/3P4/8/8/8/8/8/7K w - -'
         }
 
         get fen(){
@@ -332,11 +389,18 @@ updateFen(toCell,fromCell,piece){
     //board creation
         constructBoard(){
             //make board grid and border
-            this.append(new ChessGrid);
-            this.append(...this.makeBorder());
+            const span = document.createElement('div');
+            span.id = `chessboardwrapper`;
+            this.append(span)
+            span.append(new ChessGrid);
+            span.append(...this.makeBorder());
             //make moves log earya and graveyard
             this.append(this.makeGraveyard());
             this.append(this.makeMoveLog());
+            //dragdiv
+            const dragdiv = document.createElement('div');
+            dragdiv.id = 'dragdiv';
+            this.append(dragdiv);
         }  
         makeBorder(){
             const arr = [];
