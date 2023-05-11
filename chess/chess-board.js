@@ -30,6 +30,10 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
         //click, touch and drag handlers
         this.setEventListners();
     }
+
+    get extra(){
+        return this.hasAttribute(`extra`);
+    }
     
     //interaction functions
     
@@ -42,12 +46,11 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
         this.addEventListener("dragstart", (evt) => this.dragStartHandler(evt));
         document.addEventListener("dragover", (evt) => this.onMouseMove(evt));
         this.addEventListener("dragend", (evt) => this.dragEndHandler(evt));
-        this.addEventListener("drop", (evt) => this.dropHandler(evt))
 
         //touch
-        this.addEventListener("touchstart", (evt) => this.touchStartHandler(evt));
+        this.addEventListener("touchstart", (evt) => this.dragStartHandler(evt));
         document.addEventListener("touchmove", (evt) => this.onMouseMove(evt));
-        this.addEventListener("touchend", (evt) => this.touchEndHandler(evt));
+        this.addEventListener("touchend", (evt) => this.dragEndHandler(evt));
 
         //todo db?
 
@@ -56,13 +59,15 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
 
     //click functions
     clickHandler(e){
-        if(e.target.nodeName == 'CHESS-TILE' && e.pointerId == 1){
-            //we clicked in the gird
-            this.selected == 0? this.firstClick(e) : this.secondClick(e);
-
-        }else{
-            // cliked away 
-            e.target.parentElement?.nodeName == `PROMOTION-MENU`? false : this.clearSelected();
+        if(e.pointerId == 1){
+            if(e.target.nodeName == 'CHESS-TILE'){
+                //we clicked in the gird
+                this.selected == 0? this.firstClick(e) : this.secondClick(e);
+    
+            }else{
+                // cliked away 
+                e.target.parentElement?.nodeName == `PROMOTION-MENU`? false : this.clearSelected();
+            }
         }
     }
 
@@ -89,47 +94,53 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
     }
     //end click functions
 
-    //drag functions
-    //todo
+    //drag & touch functions
     dragStartHandler(e){
-        console.log(e.target);
+        if(e.target.draggable){
+            this.setSelected(e.target.piece);
+    
+            //remove ghost img
+            e.type == 'dragstart' && e.dataTransfer.setDragImage(document.createElement(`div`),0,0);
+            e.type == 'touchstart' && e.preventDefault();
+    
+            //prime dragdiv
+            const i = e.clientX ? e : e.changedTouches[0];
+            const xline = i.clientX - e.target.getBoundingClientRect().x;
+            const yline = i.clientY - e.target.getBoundingClientRect().y;
+            this.dragdiv.style.setProperty("--xline", `${xline}px`);
+            this.dragdiv.style.setProperty("--yline", `${yline}px`);
+            this.onMouseMove(e);
+    
+            //apend to mdiv
+            e.type == 'dragstart'? setTimeout(() => {this.dragdiv.append(e.target.piece)}) : this.dragdiv.append(e.target.piece);
+
+        }
     }
     dragEndHandler(e){
-
+        let endElement = e.type == 'dragend'? document.elementFromPoint(e.clientX, e.clientY) : document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+        endElement.moveType? this.moveHandler(endElement,this.selected[1],'drag') : this.clearSelected(true);
     }
-    dropHandler(e){
-
-    }
-    //end dragfunctions
-    //touchfunctions
-    touchStartHandler(e){
-
-    }
-    touchEndHandler(e){
-
-    }
-
-    //endtouchfunctions
+    //end drag & touch functions
 
     setSelected(piece){
         this.selected = [piece,piece.cell];
         this.gridNode.showSelect(this.selected);
     }
 
-    clearSelected(){
+    clearSelected(drag = false){
         console.log('clearselected');
+        drag && this.selected != 0 && this.animatePiece(this.selected[1],this.selected[0]);
         this.gridNode.clearHighlight();
         this.selected = 0;
     }
 
     onMouseMove(e) {
-        const mdiv = document.getElementById("dragdiv");
         if (e.clientX) {
-            mdiv.style.left = `calc(${e.clientX}px - var(--xline))`;
-            mdiv.style.top = `calc(${e.clientY}px - var(--yline))`;
+            this.dragdiv.style.left = `calc(${e.clientX}px - var(--xline))`;
+            this.dragdiv.style.top = `calc(${e.clientY}px - var(--yline))`;
         } else {
-            mdiv.style.left = `calc(${e.changedTouches[0].clientX}px - var(--xline))`;
-            mdiv.style.top = `calc(${e.changedTouches[0].clientY}px - var(--yline))`;
+            this.dragdiv.style.left = `calc(${e.changedTouches[0].clientX}px - var(--xline))`;
+            this.dragdiv.style.top = `calc(${e.changedTouches[0].clientY}px - var(--yline))`;
         }
         return false;
     }
@@ -144,13 +155,13 @@ moveHandler(toCell,fromCell,type = false,promotion = false){
         fromCell = this.gridNode.getCell(fromCell);
     }
     const piece = type == 'drag' || type == 'touch'? this.selected[0] : fromCell.piece;
-    //move piece
     
     //check promotion
     if(piece.type == 'pawn' && !promotion && (this.rows[0].includes(toCell) || this.rows[this.rowCount -1].includes(toCell))){
-        this.pawnPromotion(fromCell,toCell);
+        this.pawnPromotion(fromCell,toCell,type);
         
     }else{
+        //move piece
         const move = piece.type == 'king' && (toCell.x - fromCell.x) % 2 == 0 && toCell.y == fromCell.y? this.castlingMove(toCell,fromCell,piece,type) : this.normalMove(toCell,fromCell,piece,type,promotion);
         this.clearSelected();
         this.updateLog(move);
@@ -158,19 +169,24 @@ moveHandler(toCell,fromCell,type = false,promotion = false){
         //update fen
         this.updateFen(toCell,fromCell,piece);
     
-        //check win ?
-        if(this.checkWin()){
-            const winner = '';//get color or stalemate
-            console.warn('we have a winner');
-            this.HandleWin(winner);
-        }
-    
-    
-        //send to db?
-        if(type != 'db'){
-            //send move
-            //todo
-        }
+        //timeout to wait for the animation to be done so draw works for only 2 kings remain
+        setTimeout(() => {
+            //check win ?
+            if(this.checkWin()){
+                const winner = '';//get color or stalemate
+                console.warn('we have a winner');
+                this.HandleWin(winner);
+            }
+            
+            //update draggable
+            this.updateDraggable();
+        
+            //send to db?
+            if(type != 'db'){
+                //send move
+                //todo
+            }
+        });
     }
 
 }
@@ -202,11 +218,11 @@ movePiece(toCell,piece,type){
                 const y = piece.color == 'white'? 1 : -1;
                 const tile = this.gridNode.getCell(toCell.x,toCell.y + y);
                 setTimeout(() => {
-                    this.animatePiece(this[`${tile.piece.color}graveyard`],tile.piece);
+                    this.extra? this.animatePiece(this[`${tile.piece.color}graveyard`],tile.piece): tile.piece.remove();
                 },);
         }else{
             setTimeout(() => {
-                this.animatePiece(this[`${toCell.piece.color}graveyard`],toCell.piece);
+                this.extra? this.animatePiece(this[`${toCell.piece.color}graveyard`],toCell.piece) : toCell.piece.remove();
             },);
         }
     }
@@ -214,8 +230,7 @@ movePiece(toCell,piece,type){
 }
 
 animatePiece(to,piece){
-    //todo animate
-    const from = piece.cell
+    const from = piece.cell? piece.cell : this.dragdiv; 
      //get cords where the cards is
      const [x0, y0] = [piece.getBoundingClientRect().x, piece.getBoundingClientRect().y];
      //get cords where the cards has to go
@@ -239,16 +254,18 @@ animatePiece(to,piece){
      to.append(piece);
 }
 
-pawnPromotion(fromCell,toCell){
+pawnPromotion(fromCell,toCell,type){
     console.log('pawnpromote');
     //show promotion menu
-    this.append(new promotionMenu(fromCell,toCell));
+    this.append(new promotionMenu(fromCell,toCell,type));
 }
 
 updateLog(move){
-    const p = document.createElement('li');
-    p.innerText = move;
-    this.movelog.append(p);
+    if(this.extra){
+        const p = document.createElement('li');
+        p.innerText = move;
+        this.movelog.append(p);
+    }
 }
 
 updateFen(toCell,fromCell,piece){
@@ -276,6 +293,11 @@ updateFen(toCell,fromCell,piece){
     this.turnColor = this.othercolor;
     // update fen atribute ?
     this.setAttribute('fen',this.fen);
+}
+
+updateDraggable(){
+    this.gridNode.pieces.map(piece => {piece.cell.setDragable()});
+    this.gridNode.draggableTiles.map(tile =>{tile.setDragable()});
 }
 
 // end movement functions
@@ -346,8 +368,6 @@ updateFen(toCell,fromCell,piece){
     //fen stuf
         get defaultFen(){
             return 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0';
-            // return '8/8/1p6/kn4r1/8/8/r7/7K w - - 1 0'
-            // return 'k7/3P4/8/8/8/8/8/7K w - -'
         }
 
         get fen(){
@@ -356,12 +376,16 @@ updateFen(toCell,fromCell,piece){
 
         set fen(fen){
             const [gridFen,turnColor,castlingFen,apFen,fulFen,halfFen] = fen.split(' ');
-
+            
+            this.turnColor = turnColor;
+            this.castlingFen = castlingFen;
+            this.inPassing = apFen;
+            
             //gridFen
             let count = 0;
             gridFen.split('/').map(row => { 
-               Array.from(row).map(letter =>{
-                if (letter != +letter){
+                Array.from(row).map(letter =>{
+                    if (letter != +letter){
                     // we have a piece
                     this.grid[count].append(new ChessPiece(letter));
                     count ++;
@@ -369,13 +393,9 @@ updateFen(toCell,fromCell,piece){
                 else{
                     count += +letter;
                 }
-               });
             });
-
-            this.turnColor = turnColor;
-            this.castlingFen = castlingFen;
-            this.inPassing = apFen;
-        }
+            });
+        }     
 
         get othercolor(){
             return this.turnColor == 'w'? 'b' : 'w'; 
@@ -384,6 +404,7 @@ updateFen(toCell,fromCell,piece){
         checkFen(fen){
             // check valid fen
         }
+
 
     //end fen stuf
     //board creation
@@ -395,8 +416,10 @@ updateFen(toCell,fromCell,piece){
             span.append(new ChessGrid);
             span.append(...this.makeBorder());
             //make moves log earya and graveyard
-            this.append(this.makeGraveyard());
-            this.append(this.makeMoveLog());
+            if(this.extra){
+                this.append(this.makeGraveyard());
+                this.append(this.makeMoveLog());
+            }
             //dragdiv
             const dragdiv = document.createElement('div');
             dragdiv.id = 'dragdiv';

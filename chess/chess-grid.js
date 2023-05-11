@@ -82,6 +82,17 @@ class ChessGrid extends HTMLElement{
         return this.querySelector(`[white][king]`);
     }
 
+    get pieces(){
+        return this.whitePieces.concat(this.blackPieces);
+    }
+
+    get draggableTiles(){
+        //get draggable tils that have no pieces
+        return Array.from(this.querySelectorAll(`[draggable='true']:not(:has(*))`));
+    }
+
+
+
     get inCheck(){
         //returns true false if king in check
         const color = this.board.turnColor == 'w'? 'white' : 'black';

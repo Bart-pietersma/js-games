@@ -1,6 +1,6 @@
 chess-piece{
     width: var(--square-size);
-    height: inherit;
+    height: var(--square-size);
     pointer-events: none;
 }
 

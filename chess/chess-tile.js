@@ -8,6 +8,23 @@ class ChessTile extends HTMLElement{
 
     connectedCallback(){
         this.setBackgroundColor();
+        this.addEventListener("dragover", (evt) => this.dragoverHandler(evt));
+        this.addEventListener("mouseenter", (evt) => this.mouseEnterHandler(evt));
+        this.addEventListener("mouseleave", (evt) => this.mouseLeave(evt));
+    }
+
+    closestElement(selector, el = this) {
+        return (
+            (el && el != document && el != window && el.closest(selector)) ||
+            this.closestElement(selector, el.getRootNode().host)
+        );
+    }
+    get grid() {
+        return this.closestElement("chess-grid");
+    }
+
+    get board(){
+        return this.closestElement('chess-board');
     }
 
     get coord(){
@@ -19,7 +36,6 @@ class ChessTile extends HTMLElement{
     }
 
     get piece(){
-        //todo
         return this.querySelector('chess-piece');
     }
 
@@ -33,8 +49,21 @@ class ChessTile extends HTMLElement{
         this.toggleAttribute((((this.y +1) % 2 == 0 && (this.x + 1) % 2 == 0) || ((this.y +1) % 2 != 0 && (this.x + 1) % 2 != 0) ? 'light' : 'dark') ,true)
     }
 
+    mouseEnterHandler(e){
+        this.piece && this.board.selected == 0 && this.grid.showSelect([this.piece, this]);
+    }
+    mouseLeave(e){
+        this.board.selected == 0 && this.grid.clearHighlight();
+    }
+
     setDragable(){
-        this.draggable = this.piece? true : '';
+        this.draggable = this.piece && this.board.turnColor == this.piece?.color[0]? true : '';
+        !this.draggable && this.removeAttribute(`draggable`);
+    }
+
+    dragoverHandler(e){
+        this.moveType && e.preventDefault();
+        return false
     }
 }
 customElements.define('chess-tile', ChessTile);

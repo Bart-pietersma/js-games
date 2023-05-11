@@ -53,7 +53,7 @@ class ChessPiece extends HTMLElement{
 
     get cell(){
         //to prefent a inf loop when a piece is not on the board
-        return this.parentElement != this.board? this.closestElement("chess-tile"): false;
+        return this.parentElement.nodeName == 'CHESS-TILE'? this.closestElement("chess-tile"): false;
     }
 
     get x(){
@@ -65,7 +65,6 @@ class ChessPiece extends HTMLElement{
     }
 
     get letter(){
-        //todo knight bs
         if(this.type == 'knight')return this.color == 'white'? 'N' : 'n';
         return this.color == 'white'? this.type.charAt(0).toUpperCase() : this.type.charAt(0).toLowerCase() ;
     }
@@ -137,7 +136,6 @@ class ChessPiece extends HTMLElement{
             return this.moves
         }
         else if(this.type == 'king'){
-            //todo test
             //we move the king of board then see if the tiles are attackble put king back and return the alowed moves
             const moves = this.moves;
             const cell = this.cell;
@@ -277,7 +275,6 @@ class ChessPiece extends HTMLElement{
 
     get kingMoves(){
         const moves = this.queenMoves.map(array => array[0]).filter(n => n);
-        //todo check castling
         //Castling is permitted only if neither the king nor the rook has previously moved; the squares between the king and the rook are vacant; and the king does not leave, cross over, or finish on a square attacked by an enemy piece.
         // add castling moves
         this.color == 'white'? 'uppercase' : 'lowercase';
@@ -303,7 +300,6 @@ class ChessPiece extends HTMLElement{
     }
 
     attackcell(cell,king = false){
-        //todo
         // return true if it can attack the cell
         if(this.type == 'pawn')return this.pawnAttackMoves.includes(cell)
         else if(this.type == 'king')return this.kingAttackMoves.includes(cell)

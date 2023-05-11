@@ -1,10 +1,12 @@
 :root{
     --border-color : gray ;
-
+    /* this is so pawn promote gets over the boardgrid */
+    --grid-row : 1;
+    --grid-col : 2;
 }
 
 body{
-    background-color: beige;
+    background-color: limegreen;
 }
 
 chess-board {
@@ -31,16 +33,21 @@ chess-board {
 }
 
 #movelog{
-    width: calc(var(--square-size) * 4);
-    height: -webkit-fill-available;
-    display: grid;
-    grid-template-columns: repeat(4,1fr);
+    display: flex;
     padding: 0;
+    height: -webkit-fill-available;
     justify-items: start;
+    width: calc(var(--square-size) * 4);
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-content: flex-start;
 }
 
 #movelog > li{
-    margin-inline-start: 30px;
+    margin-inline-start: 25px;
+    border: 1px solid;
+    padding-inline: 2px;
+    margin-block: 1px;
 }
 
 #graveyards{
@@ -54,7 +61,13 @@ chess-board {
 #graveyard_black,#graveyard_white{
     display: flex;
     flex-wrap: wrap;
-    flex-direction: row-reverse;
+    flex-direction: column;
+    align-content: flex-end;
+    height: calc(var(--square-size) * 4);
+}
+
+#graveyard_black{
+    flex-direction: column-reverse;
 }
 
 .columnbar{
@@ -90,9 +103,15 @@ chess-board {
 }
 
 /* aling grid */
-
 #chessboardwrapper{
     display: grid;
+    /*  */
+    grid-row: var(--grid-row);
+    grid-column: var(--grid-col);
+}
+
+#movelog{
+    grid-area: 1/3;
 }
 
 chess-grid{

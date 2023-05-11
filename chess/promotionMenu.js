@@ -1,17 +1,17 @@
+import { ChessPiece } from "./chess-piece.js";
 import { importCss } from "./functions.js";
 class promotionMenu extends HTMLElement{
-    constructor(fromCell,toCell){
+    constructor(fromCell,toCell,drag){
         super()
         this.fromCell = fromCell;
         this.toCell = toCell;
+        this.moveType = drag;
+        importCss('promotionmenu.css');
     }
 
     connectedCallback(){
-        importCss('chess-piece.css');
-
         this.setAttribute('promotion','queen,rook,bishop,knight');
-        this.constructRadioButton(this.optionAttr);
-        this.constructButton()
+        this.constructImage(this.optionAttr);
     }
 
     closestElement(selector, el = this) {
@@ -31,32 +31,25 @@ class promotionMenu extends HTMLElement{
         }).filter(n => n)[0];
     }
 
-    constructRadioButton(attr){
+    constructImage(attr){
         attr.value.split(",").map(value =>{
-            const input = document.createElement("input")
-            input.id = attr.name+value;
-            input.type = "radio";
-            input.name = attr.name;
-            input.checked = value == 'queen'? true : false;
-            input.value = value[0] == 'k'? 'n': value[0];
-            this.append(input);
-            const label = document.createElement('label');
-            label.htmlFor = attr.name+value;
-            label.textContent = value;
-            this.append(label);
+            console.log(this.board.turnColor);
+            let ltr = this.board.turnColor == 'w'? value[0].toUpperCase() : value[0];
+            ltr = ltr.toLowerCase() == 'k'? this.board.turnColor == 'w'? 'N' : 'n' : ltr;
+            const team = ltr == ltr.toUpperCase()? 'white' : 'black';
+            const img = document.createElement(`img`);
+            img.value = ltr
+            img.onclick = (e =>{this.buttonHandler(img.value)});
+            img.src = `./svg/${team}-${value}.svg`;
+            img.width = 80;
+            img.height = 80;
+            this.append(img);
         });
     }
-    constructButton(){
-        const input = document.createElement('input');
-        input.type = "button";
-        input.onclick = (e =>{this.buttonHandler()});
-        input.value = 'submit';
-        this.append(input);
-    }
 
-    buttonHandler(){
-        const promotion = this.querySelector(`input:checked`).value
-        this.board.moveHandler(this.toCell,this.fromCell,'click',promotion)
+    buttonHandler(ltr){
+        console.log(this.moveType);
+        this.board.moveHandler(this.toCell,this.fromCell,this.moveType,ltr)
         this.remove();
     }
 }
