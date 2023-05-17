@@ -1,21 +1,22 @@
     /* 
         actions: initgame, joingame, move, completegame, getopengames, getongoinggames,getmoves
 
-        initgame: create
+        newgame: create
         send: type,player,playerlimit,boardstate
         resive: guid
 
         joingame: update
         send: player,guid
         resive: comfirmation
+        
+        endgame: update
+        send: guid,winner,boardstate
+        resive: comfirmation
 
         move: create & update
         send: guid,move,boardstate
         resive comfirmation
 
-        completegame:
-        send: guid,winner,boardstate
-        resive: comfirmation
 
         getopengames: query
         send: 
@@ -30,8 +31,8 @@
         resive: array of all moves from guid board
 
         db: 
-        matches: id,type,players,playerlimit,boardstate,guid,winner,movelist?
-        moves:  id,guid,move
+        matches: id,type,players,playerlimit,boardstate,guid,winner,starttime,endtime
+        moves:  id,guid,move,timestamp
     */
 class ApiHandler{
     constructor(url = "../database/chessgame.php", eUrl = "../database/matchmoves_eventsource.php"){
