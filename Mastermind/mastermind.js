@@ -68,13 +68,21 @@ customElements.define("master-mind", class MasterMind extends HTMLElement{
     }
 
     checkCode(){
+        //check for corect spot otherwise check if color corect but incorect spot and if color is already in correct check
         const code =this.activeRow.code;
         let corect = 0;
         let color = 0;
         let i = 0;
         code.map(col =>{
             if(this.secret[i] == col)corect ++
-            else if(this.secret.includes(col)) color ++;
+            else if(this.secret.includes(col)){
+                //check if color is multiple in awnser
+                
+                //now check if color is already in the corect
+
+                color ++;
+
+            } 
             i++
         });
         if(corect == this.slots)this.win();

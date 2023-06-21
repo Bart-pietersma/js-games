@@ -4,6 +4,7 @@ import { ChessPlayer } from "./chess-player.js";
 import { ChessPiece } from "./chess-piece.js";
 import {promotionMenu} from "./promotionMenu.js";
 import { ChessTile } from "./chess-tile.js";
+import { ApiHandler, DbHandler } from "./dbcaller.js";
 
 //todo
 /*
@@ -19,6 +20,7 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
         super()
         this.player1 = new ChessPlayer('white');
         this.player2 = new ChessPlayer('black');
+        this.db = new DbHandler();
         this.selected = 0;
     }
     
@@ -53,6 +55,7 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
         this.addEventListener("touchend", (evt) => this.dragEndHandler(evt));
 
         //todo db?
+        this.addEventListener('db-move', (e) => this.dbMove(e));
 
     }
 
@@ -145,6 +148,10 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
         return false;
     }
 
+    dbMove(e){
+        console.log(e.detail);
+    }
+
 //end interaction funtcions
 
 //movement functions
@@ -154,7 +161,12 @@ moveHandler(toCell,fromCell,type = false,promotion = false){
         toCell = this.gridNode.getCell(toCell);
         fromCell = this.gridNode.getCell(fromCell);
     }
+    type == 'db' && this.setSelected(fromCell.piece);
+
     const piece = type == 'drag' || type == 'touch'? this.selected[0] : fromCell.piece;
+    //check valid input
+    if(type == 'drag' || type == 'touch') fromCell.append(piece);
+    if(!piece.finalMoves.includes(toCell)) return 'invalid move';
     
     //check promotion
     if(piece.type == 'pawn' && !promotion && (this.rows[0].includes(toCell) || this.rows[this.rowCount -1].includes(toCell))){
@@ -185,6 +197,7 @@ moveHandler(toCell,fromCell,type = false,promotion = false){
             if(type != 'db'){
                 //send move
                 //todo
+                this.db.move(this.id,move,this.fen);
             }
         });
     }
@@ -201,17 +214,17 @@ normalMove(toCell,fromCell,piece,type,promotion){
         const newPiece = new ChessPiece(promotion);
         toCell.append(newPiece);
     }
-    return  fromCell.chessCoord+(toCell.moveType == 'move'? ' - ': ' x ')+toCell.chessCoord+extraMoveBit;
+    return  fromCell.chessCoord+(toCell.moveType == 'move'? '-': 'x')+toCell.chessCoord+extraMoveBit;
 }
 castlingMove(toCell,fromCell,piece,type){
     this.movePiece(toCell,piece,type);
     const rook = toCell.x - fromCell.x <0? this.gridNode.getCell([0,piece.y]).piece : this.gridNode.getCell([7,piece.y]).piece ;
     this.movePiece(this.gridNode.getCell(toCell.x -(toCell.x - fromCell.x)/2,fromCell.y) ,rook,'db');
-    return toCell.x - fromCell.x <0 ? 'o-o-o' : 'o-o';
+    return toCell.x - fromCell.x <0 ? '0-0-0' : '0-0';
 }
 
 movePiece(toCell,piece,type){
-    if(toCell.moveType == "attack"){
+    if(toCell.moveType == "attack"|| toCell.piece){
         //send piece to graveyard
         //check inpassing move
         if(toCell == this.gridNode.getCell(this.inPassing) && piece.type == 'pawn'){
