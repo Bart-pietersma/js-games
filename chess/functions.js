@@ -2,6 +2,7 @@ console.log("functions.js loaded");
 
 function importCss(path){
 
+  path = `./css/`+path;
 let name = path.split('/');
 const last = name.length -1;
 name = name[last].split('.');
@@ -19,5 +20,10 @@ name = name[0];
         }
 }
 
-
-export{importCss}
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+  let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+  return v.toString(16);
+});
+}
+export{importCss, uuidv4}

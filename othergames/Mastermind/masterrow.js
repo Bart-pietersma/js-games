@@ -43,9 +43,9 @@ customElements.define("master-row" , class MasterRow extends HTMLElement{
         return this.toggleAttribute("active" , bool);
     }
 
-    setHints(color,corect){
-        this.setAttribute("hint1",corect);
-        this.setAttribute("hint2", color );
+    setHints(corect,color){
+        this.setAttribute("hint1",color);
+        this.setAttribute("hint2",corect );
     }
 
 });

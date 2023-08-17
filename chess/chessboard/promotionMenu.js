@@ -1,5 +1,5 @@
 import { ChessPiece } from "./chess-piece.js";
-import { importCss } from "./functions.js";
+import { importCss } from "../functions.js";
 class promotionMenu extends HTMLElement{
     constructor(fromCell,toCell,drag){
         super()

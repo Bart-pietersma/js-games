@@ -12,7 +12,7 @@
     <chess-piece type= pawn  team = black></chesspiece>
 */
 
-import { importCss } from "./functions.js";
+import { importCss } from "../functions.js";
 
 
 class ChessPiece extends HTMLElement{

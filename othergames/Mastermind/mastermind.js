@@ -70,24 +70,25 @@ customElements.define("master-mind", class MasterMind extends HTMLElement{
     checkCode(){
         //check for corect spot otherwise check if color corect but incorect spot and if color is already in correct check
         const code =this.activeRow.code;
-        let corect = 0;
-        let color = 0;
+        let corect = [];
+        let color = [];
         let i = 0;
         code.map(col =>{
-            if(this.secret[i] == col)corect ++
-            else if(this.secret.includes(col)){
-                //check if color is multiple in awnser
-                
-                //now check if color is already in the corect
-
-                color ++;
-
-            } 
+            console.log(col);
+            if(this.secret[i] == col)corect.push(col);
             i++
         });
         if(corect == this.slots)this.win();
         else{
-            this.activeRow.setHints(color,corect);
+            i = 0;
+            code.map(col =>{
+                //todo add the rules for 2 colors
+                if(this.secret[i] != col && !corect.includes(col)){
+                    color.push(col);
+                }
+            });
+            console.log(corect,color);
+            this.activeRow.setHints(corect.length,color.length);
             this.changeActiveRow();
         }
     }

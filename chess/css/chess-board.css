@@ -1,5 +1,5 @@
 :root{
-    --border-color : gray ;
+    --border-color : #858585 ;
     /* this is so pawn promote gets over the boardgrid */
     --grid-row : 1;
     --grid-col : 2;
@@ -95,7 +95,7 @@ chess-board {
 
 .rowbar{
     line-height: var(--square-size);
-    background-color: gray;
+    background-color: var(--border-color);
 }
 
 .columnbar, .rowbar{

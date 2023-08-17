@@ -1,5 +1,5 @@
 import {ChessTile} from "./chess-tile.js";
-import { importCss } from "./functions.js";
+import { importCss } from "../functions.js";
 
 class ChessGrid extends HTMLElement{
     constructor(columns = 8 , rows = 8 ){
@@ -131,7 +131,7 @@ class ChessGrid extends HTMLElement{
         } 
         else if (typeof x == 'string'){
             const rows = ['a','b','c','d','e','f','g','h'];
-            y = +x[1] -1;
+            y = + 7 -(x[1] -1);
             x = rows.indexOf(x[0]);
         }
         if (x >= 0 && x < this.columns.length && y >= 0 && y < this.rows.length)return this.columns[x][y];

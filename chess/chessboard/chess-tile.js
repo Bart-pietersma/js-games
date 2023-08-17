@@ -32,7 +32,7 @@ class ChessTile extends HTMLElement{
     }
 
     get chessCoord(){// ec e1 or g6
-        return String.fromCharCode(this.coord[0]+65).toLocaleLowerCase()+(this.coord[1]+1);
+        return String.fromCharCode(this.coord[0]+65).toLocaleLowerCase()+(7-this.coord[1]+1);
     }
 
     get piece(){

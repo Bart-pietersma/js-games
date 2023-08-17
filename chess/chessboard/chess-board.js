@@ -1,10 +1,9 @@
 import { ChessGrid } from "./chess-grid.js";
-import { importCss } from "./functions.js";
+import { importCss } from "../functions.js";
 import { ChessPlayer } from "./chess-player.js";
 import { ChessPiece } from "./chess-piece.js";
 import {promotionMenu} from "./promotionMenu.js";
-import { ChessTile } from "./chess-tile.js";
-import { ApiHandler, DbHandler } from "./dbcaller.js";
+import {DbHandler } from "../dbcaller.js";
 
 //todo
 /*
@@ -15,12 +14,16 @@ send a msg to api when a move has been send and board has coresponding atribute
 
 */
 
-customElements.define('chess-board',class ChessBoard extends HTMLElement {
-    constructor(){
+class ChessBoard extends HTMLElement {
+    constructor(id = 'iddv4' , extra = true){
         super()
-        this.player1 = new ChessPlayer('white');
-        this.player2 = new ChessPlayer('black');
-        this.db = new DbHandler();
+
+        this.id = id;
+        extra && this.toggleAttribute('extra');
+        
+        // this.player1 = new ChessPlayer('white');
+        // this.player2 = new ChessPlayer('black');
+        // this.db = new DbHandler();
         this.selected = 0;
     }
     
@@ -35,6 +38,9 @@ customElements.define('chess-board',class ChessBoard extends HTMLElement {
 
     get extra(){
         return this.hasAttribute(`extra`);
+    }
+    get db(){
+        return document.querySelector(`game-container`).ws;
     }
     
     //interaction functions
@@ -457,7 +463,7 @@ updateDraggable(){
                     div.classList.add('rowbar');
                     for(let i = 0;i<this.columnCount;i++){
                         const number = document.createElement("div");
-                        number.innerText = i +1;
+                        number.innerText = 8- (i );
                         div.append(number);
                     }
                 }
@@ -482,6 +488,8 @@ updateDraggable(){
         }
     //end board creation
 
-});//end ChessBoard
+};//end ChessBoard
 
+customElements.define(`chess-board`, ChessBoard);
+export {ChessBoard};
 console.log('chess-board.js loaded');
