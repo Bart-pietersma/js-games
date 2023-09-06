@@ -26,8 +26,8 @@ class ApiHandler {
       move: 'INSERT INTO moves (boardID, move) VALUES (?,?) ',
       getMoves : 'SELECT move FROM moves where boardID = ? ',
       updateBoardState: 'UPDATE boards SET boardState = ? where boardID = ?',
-      getPlayers: 'SELECT players from boards where boardID = ?',
-      addPlayer: 'UPDATE boards set players = ? WHERE boardID = ?',
+      getPlayers: 'SELECT players, playerlimit from boards where boardID = ?',
+      addPlayer: 'UPDATE boards set players = ?, playerlimit = ? WHERE boardID = ?',
       endGame: 'UPDATE boards set resolution = ?, endtime = CURENT_TIMESTAMP() WHERE boardID = ?',
 
       //lobby stuf
@@ -55,13 +55,35 @@ class ApiHandler {
       });
   }
 
-  joinBoard(boardID, player, callback) {
+  checkdubbel(string, check){
+    return string.split(`,`).includes(check);
+  }
+
+  joinBoard(boardID, newplayer, callback) {
     //todo make so acidentel joingames to same user not good
     this.EscapeQuery(this.querys.getPlayers, boardID, (response) => {
-      player = response[0].players + `,` + player;
-      this.EscapeQuery(this.querys.addPlayer, [player, boardID], (response) => {
-        callback(response);
-      });
+      if(response[0]){
+        const players = response[0].players;
+        let playerlimit = response[0].playerlimit;
+        playerlimit == `full` && callback(`match full`);
+        console.log(555 , players, playerlimit);
+        //check dubbel user
+        if(this.checkdubbel(response[0].players,newplayer)){
+          callback(`user already in game`);
+        }else{
+          //todo check if player is in last spot then add full to playerlimit
+          newplayer = players + `,` + newplayer;
+          console.log(`players = `+newplayer.split(`,`).length +` playerlimit = `+playerlimit);
+          if(newplayer.split(`,`).length == playerlimit) playerlimit = `full`;
+          this.EscapeQuery(this.querys.addPlayer, [newplayer,playerlimit, boardID], (response) => {
+            callback(boardID);
+          });
+        } 
+      }
+      else{
+        console.log(`eror board undifined`);
+       callback(`boardID undifined`); 
+      }
     });
   }
 
@@ -96,7 +118,7 @@ class ApiHandler {
     this.Query(
       this.querys.showAvailbleBoards,
       (response) => {
-        console.log(response);
+        //returns a arr[] with obj{boardID,boardType,playerlimit}
         callback(response);
       });
   }

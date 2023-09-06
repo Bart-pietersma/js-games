@@ -61,7 +61,7 @@ class ChessBoard extends HTMLElement {
         this.addEventListener("touchend", (evt) => this.dragEndHandler(evt));
 
         //todo db?
-        this.addEventListener('db-move', (e) => this.dbMove(e));
+        document.addEventListener('db-move', (e) => this.dbMove(e));
 
     }
 
@@ -155,7 +155,28 @@ class ChessBoard extends HTMLElement {
     }
 
     dbMove(e){
-        console.log(e.detail);
+        const data = e.detail;
+        const [toCell,fromCell] = this.moveInterpreter(data.move,data.fen);
+        console.log(fromCell,toCell);
+        this.moveHandler(toCell,fromCell,`db`);
+    }
+
+    moveInterpreter(move,fen){
+        let toCell = '';
+        let fromCell = '';
+        if(move == `0-0-0` || move == '0-0' || move == 'o-o-o' || move == 'o-o'){
+            //0-0-0 || 0-0
+            const rank = fen.includes('w')? '1': '8';
+            const file = move == '0-0-0' || move == 'o-o-o'? 'c' : 'g'
+            fromCell = 'e'+rank;
+            toCell = file+rank; 
+        }
+        else{
+            //normal move
+            toCell = move.substring(3);
+            fromCell = move.substring(0,2);
+        }
+        return [toCell,fromCell];
     }
 
 //end interaction funtcions
@@ -295,11 +316,11 @@ updateFen(toCell,fromCell,piece){
            this.castlingFen = this.castlingFen.replace(letter ,'');
         }
         else if(piece.type == 'king'){
-            if(piece.color == 'white' && fromCell == this.gridNode.getCell('e8')){
+            if(piece.color == 'white' && fromCell == this.gridNode.getCell('e1')){
                 this.castlingFen = this.castlingFen.replace('Q','');
                 this.castlingFen = this.castlingFen.replace('K','');
             }
-            else if (piece.color == 'black' && fromCell == this.gridNode.getCell('e1') ){
+            else if (piece.color == 'black' && fromCell == this.gridNode.getCell('e8') ){
                 this.castlingFen = this.castlingFen.replace('q','');
                 this.castlingFen = this.castlingFen.replace('k','');
             }

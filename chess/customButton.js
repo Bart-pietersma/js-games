@@ -1,18 +1,29 @@
 class MenuButton extends HTMLElement {
-    constructor(btntype){
+    constructor(btntype, id){
         super()
 
         switch(btntype){
-            case (`newgame` || `newGame`):
+            case `newGame`:
                 this.id = 'newgame';
                 this.innerText = 'new game';
                 this.onclick = this.btnNewGame;
             break;
             case 'joinGame':
-                this.id = 'newgame';
-                this.innerText = 'new game';
-                this.onclick = this.btnNewGame;
+                this.id = 'joingame';
+                this.innerHTML = /*html*/`<input type="text"><br>join game`;
+                this.onclick = this.btnJoinGame;
             break;
+            case 'multieplayer':
+                this.id = 'multieplayer';
+                this.innerText = 'multieplayer';
+                this.onclick = this.btnMultieplayer;
+            break;
+            case 'options':
+                this.id = 'options';
+                this.innerText = 'options';
+                this.onclick = this.btnJoinGame;
+            break;
+
         }
     }
 
@@ -28,7 +39,10 @@ class MenuButton extends HTMLElement {
     }
 
     get ws(){
-        return this.closestElement(`game-container`).ws;
+        return this.containter.ws;
+    }
+    get containter(){
+        return this.closestElement(`game-container`)
     }
 
 
@@ -38,8 +52,28 @@ class MenuButton extends HTMLElement {
         //send ws call to newgame
         //
         console.log('newgame btn pressed');
-        this.ws.makeGame();
+        if(this.ws.makeGame() != 1){
+            console.log(`failed`);
+            //todo eror handling
+        } 
     }
+    btnJoinGame(e){
+        //open up a textfield to imput board id and send it to ws
+        //todo
+        if(this.firstChild.value.length > 0){
+            console.log(this.firstChild.value);
+            if(this.ws.joinGame(this.firstChild.value, this.containter.playerData.userID) != 1){
+                console.log(`failed`);
+                //todo eror handling
+            }
+        }
+    }
+    btnMultieplayer(e){
+        //generate a lobybrowser with
+        this.ws.getOpenGames();
+    }
+
+
 
 }
 customElements.define(`custom-button`, MenuButton);

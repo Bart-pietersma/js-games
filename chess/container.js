@@ -1,16 +1,15 @@
 import './chessboard/chess-board.js';
 import { ChessBoard } from './chessboard/chess-board.js';
+import { MenuButton } from './customButton.js';
 import { DbHandler } from './dbcaller.js';
-import {uuidv4 } from './functions.js';
+import {importCss, uuidv4 } from './functions.js';
 import { MainMenu } from './optionmenu.js';
 
-//! todo chess grid fix A1 is bottom left where white rook sits
 
 class GameContainer extends HTMLElement{
     constructor(){
         super()
 
-        this.playerData = JSON.parse(localStorage.getItem('playerData'));
         if(this.playerData == null){
             localStorage.setItem('playerData',JSON.stringify({'userID' : uuidv4()}));
             this.playerData = localStorage.getItem('playerData');
@@ -20,17 +19,22 @@ class GameContainer extends HTMLElement{
         this.ws = new DbHandler;
     }
 
+    get playerData(){
+        return JSON.parse(localStorage.getItem('playerData'));
+    }
+
     connectedCallback(){
         if(this.playerData == null){
             //make optionscreen to give 
         }
-
+        importCss(`container.css`);
         this.setEventListners();
     }
 
     setEventListners(){
-        console.log(55);
-        this.addEventListener(`db-newgame`, e => this.makeChessBoard(e));
+        document.addEventListener(`db-newgame`, e => this.makeChessBoard(e));
+        document.addEventListener(`db-joinGame`, e => this.makeChessBoard(e));
+        document.addEventListener(`db-getOpenGames`, e => this.makeLobyBrowser(e));
     }
     closestElement(selector, el = this) {
         return (
@@ -41,20 +45,63 @@ class GameContainer extends HTMLElement{
 
     //todo remake to make implement generic game
     makeChessBoard(e){
+        const id = e.detail.response;
         this.clear();
         console.log(e);
+        const banner = document.createElement(`label`);
+        banner.innerText = `ID = ` + id;
+        this.prepend(banner);
+        const chesBoard = new ChessBoard(id,true);
+        console.log(chesBoard);
+        this.append(chesBoard);
+    }
+    loadGame(e){
+        this.clear();
+        console.log(e);
+        const banner = document.createElement(`label`);
+        banner.innerText = `ID = ` + e.detail;
+        this.prepend(banner);
         const chesBoard = new ChessBoard(e.detail,true);
         console.log(chesBoard);
         this.append(chesBoard);
-        
     }
 
     makeOptionMenu(){
         //todo
     }
 
-    makeLobybrowser(){
+    makeLobyBrowser(e){
         //todo
+        console.log(e);
+        console.warn(e.detail);
+        this.clear()
+        const loby = document.createElement(`div`);
+        loby.id = `lobybrowser`;
+        loby.innerHTML = /*html*/`
+            <div>host</div>
+            <div>gametype</div>
+            <div>players</div>
+            <div></div>
+        `;
+        e.detail.response.map(match => {
+           const div = /*html*/`
+                        <div>${match.boardID}</div>
+                        <div>${match.boardType}</div>
+                        <div>?/${match.playerLimit}</div>
+                        <button id=${match.boardID}>join</button>
+                    `;
+            loby.innerHTML += div;
+            // loby.append(new MenuButton(`multijoin`,match.boardID));
+        })
+        this.append(loby);
+        this.addEventListener(`click`, e => this.lobybutton(e));
+    }
+
+    lobybutton(e){
+        console.log(`click `,e.target.nodeName)
+        if(e.target.nodeName == `BUTTON`){
+            this.ws.joinGame(e.target.id,this.playerData.userID);
+        }
     }
     makeMainmenu(){
         //todo

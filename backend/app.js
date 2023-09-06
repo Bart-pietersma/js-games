@@ -48,6 +48,7 @@ wss.on("connection", ws => {
                     (response) =>{
                         wss.clients.forEach(client => {
                             client != ws && (ws.boardID == msg.id || ws.boardID == 'observer') && client.send(JSON.stringify(msg));
+                            // client.send(JSON.stringify(msg))
                         });
                 })
             break;
@@ -58,15 +59,18 @@ wss.on("connection", ws => {
                     [boardID,msg.type,msg.player,parseInt(msg.playerlimit),msg.boardstate],
                     (response)=> {
                         ws.boardID = boardID;
-                        ws.send(JSON.stringify({'action':'makegame','response': boardID}));
+                        ws.send(JSON.stringify({'action':'newgame','response': boardID}));
                         console.log(ws.boardID);
                     })
             break;
             case 'joinGame':
                 sql.joinBoard(msg.boardID,msg.player,(response) =>{
                     ws.board = msg.boardID;
-                    ws.send(JSON.stringify({'action':'joinGame', 'response':msg.boardID}));
+                    ws.send(JSON.stringify({'action':'joinGame', response}));
                 });
+            break;
+            case 'spectateGame':
+
             break;
             case 'endgame':
                 sql.endGame(msg.boardID,msg.resolution,(response) =>{

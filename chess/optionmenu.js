@@ -18,7 +18,14 @@ class MainMenu extends Menu {
     }
 
     connectedCallback(){
-        this.append(new MenuButton('newgame'));
+        this.makeButtons();
+    }
+
+    makeButtons(){
+        this.append(new MenuButton('newGame'));
+        this.append(new MenuButton('joinGame'));
+        this.append(new MenuButton('multieplayer'));
+        this.append(new MenuButton('options'));
     }
 
 }
