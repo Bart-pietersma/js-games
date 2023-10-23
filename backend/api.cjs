@@ -1,25 +1,16 @@
-//!make the crud api here!!!
-import { createPool } from 'mysql';
+const WebSocketServer = require('ws');
+const mysql = require('mysql');
+const wss = new WebSocketServer.Server({ port: 8080 });
 
 class ApiHandler {
   constructor() {
-      
-    //   this.pool = createPool({
-      // connectionLimit: 10,
-      //     host:'rtdb.nl',
-      //     database: 'rtdb-db',
-      //     user:'rtdbadmin',
-      //     password:'Z25j8&v9p',
-    // });
-
-    //old db
-    this.pool = createPool({
+     this.pool = mysql.createPool({
       connectionLimit: 10,
       host: `schaakzet.nl`,
       database: `schaakzet_main`,
       user: `schaakzet_mainadmin`,
       password: `SCH@@K!mat`
-    });
+     });
 
     this.querys = {
       //board stuff
@@ -44,9 +35,7 @@ class ApiHandler {
 
   }
 
-  //! make safty check to comfirm if query is a duplicate
-
-  createBoard(arr, callback) {
+	 createBoard(arr, callback) {
     //send a createboard query to the database return a okpacket object
     this.EscapeQuery(
       this.querys.newGame,
@@ -67,14 +56,12 @@ class ApiHandler {
         const players = response[0].players;
         let playerlimit = response[0].playerlimit;
         playerlimit == `full` && callback(`match full`);
-        console.log(555 , players, playerlimit);
         //check dubbel user
         if(this.checkdubbel(response[0].players,newplayer)){
           callback(`user already in game`);
         }else{
           //todo check if player is in last spot then add full to playerlimit
           newplayer = players + `,` + newplayer;
-          console.log(`players = `+newplayer.split(`,`).length +` playerlimit = `+playerlimit);
           if(newplayer.split(`,`).length == playerlimit) playerlimit = `full`;
           this.EscapeQuery(this.querys.addPlayer, [newplayer,playerlimit, boardID], (response) => {
             callback(boardID);
@@ -160,6 +147,55 @@ class ApiHandler {
     this.pool.end((err) => { });
   }
 
-}
+ 
 
-export { ApiHandler };
+}
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+  let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+  return v.toString(16);
+});
+}
+const sql = new ApiHandler();
+
+wss.on("connection", ws => {
+    console.log("new client connected");
+    //seting data on client
+
+
+    // sending message to client
+    ws.send(JSON.stringify(`conection has happend`));
+
+    //on message from client
+    ws.on("message", data => {
+      ws.send(`resived msg`);
+      const msg = JSON.parse(data);
+        console.log(`Client has sent us: ${data}`)
+        const boardID = uuidv4();
+        ws.send(`handeling request`);
+        sql.createBoard(
+          [boardID,msg.type,msg.player,parseInt(msg.playerlimit),msg.boardstate],
+          (response)=> {
+              ws.boardID = boardID;
+              ws.send(JSON.stringify({'action':'newgame','response': boardID}));
+          })
+        
+
+		// ws.send(JSON.stringify(sql.querys));
+
+      
+    });
+
+    // handling what to do when clients disconnects from server
+    ws.on("close", () => {
+        console.log("the client has disconnected");
+        //todo remove user from data
+        //todo send user quited to others on the same board
+
+    });
+    // handling client connection error
+    ws.onerror = function () {
+        console.log("Some Error occurred")
+    }
+});
+console.log("The WebSocket server is running on port 8080");

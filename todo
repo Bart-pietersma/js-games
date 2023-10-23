@@ -1,8 +1,6 @@
-make start screen
-    buttons
-    
-make start menu
-
-
-make options menu *optional
 make replay function
+
+swap locatior black player
+flip board top bottom, left right
+flip fen reading 
+

@@ -1,0 +1,45 @@
+:root{
+    --cell-size : 3em;
+    --color-norm : #194cd8;
+    --color-hover : #4674f3 ;
+    --color-active : #002eac ;
+    --color-sweep : #ba1010 ;
+}
+minesweeper-board{
+    display: block;
+    width: fit-content;
+    margin: auto;
+}
+
+game-grid{
+    --square-size : 3em;
+    --square-color-1 : #194cd8;
+}
+
+
+grid-tile{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
+
+game-grid grid-tile:hover{
+    background-color: var(--color-hover);
+}
+
+game-grid grid-tile:active{
+    background-color: var(--color-active);
+}
+
+game-grid grid-tile[sweep]{
+    background-color: var(--color-sweep);
+
+}
+
+grid-tile[sweep]::before{
+    content: attr(sweep);
+}
+
+[flag]::after{
+    content: "🚩";
+}
