@@ -1,4 +1,5 @@
 import {GameGrid} from 'https://rtdb.nl/bplib/grid.js';
+import {animatePiece} from 'https://rtdb.nl/functions.js'
 
 
 class CheckerPiece extends HTMLElement {
@@ -54,10 +55,28 @@ class CheckerBoard extends HTMLElement {
     connectedCallback(){
         this.append(this.grid);
         this.placePieces();
+        this.grid.setdraggable();
+
+        //eventlistners
+
+        document.addEventListener('gamegriddrop', e => this.drophandler(e))
     }
 
     get startfen(){
         return 'ppppp/ppppp/ppppp/ppppp/5/5/PPPPP/PPPPP/PPPPP/PPPPP';
+    }
+
+    drophandler(e){
+        const target = e.detail.target;
+        const piece = e.detail.piece;
+        const from = e.detail.from;
+        //allow drop check
+        if(target.move == true){
+            target.append(piece)
+        }else{
+            animatePiece(from,piece,1.25);
+        }
+        this.grid.changeTurn();
     }
     
 
