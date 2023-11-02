@@ -1,4 +1,7 @@
-
+:root{
+    --color-player-1 : beige;
+    --color-player-2 : brown;
+}
 
 body{
     color: #fff;
@@ -20,6 +23,15 @@ checker-board{
 game-grid{
     --border-size: 0;
     --square-size : 5em;
+    border : 1em solid black;
+}
+
+game-grid[playerturn ="1"]{
+    border: 1em solid var(--color-player-1);
+}
+
+game-grid[playerturn = "2"]{
+    border: 1em solid var(--color-player-2);
 }
 
 checker-piece{
@@ -27,10 +39,16 @@ checker-piece{
     width: calc(var(--square-size) * 0.9);
     height:  calc(var(--square-size) * 0.9);
     border-radius: 50%;
-    background: radial-gradient(beige 25%, #e2e4cf , beige 35%);
+    background: radial-gradient(var(--color-player-1) 25%, #e2e4cf , var(--color-player-1) 35%);
     margin: auto;
+    text-align: center;
+    line-height: calc(var(--square-size) * 0.9);
+}
+
+checker-piece[king]::before{
+    content: "👑";
 }
 
 checker-piece[player = '2']{
-    background: radial-gradient(brown 25% , #c9102f, brown 35%);
+    background: radial-gradient(var(--color-player-2) 25% , #c9102f, var(--color-player-2) 35%);
 }
