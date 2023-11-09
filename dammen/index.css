@@ -41,6 +41,7 @@ checker-piece{
     border-radius: 50%;
     background: radial-gradient(var(--color-player-1) 25%, #e2e4cf , var(--color-player-1) 35%);
     margin: auto;
+    pointer-events: none;
     text-align: center;
     line-height: calc(var(--square-size) * 0.9);
 }
