@@ -1,0 +1,64 @@
+:root{
+ --width : 85vw;
+ --height : calc(var(--width) /16 * 9 );
+ --ball-color : blue;
+ --paddle-color : blue;
+
+}
+
+breakout-container{
+    display: block;
+    position: relative;
+    margin: auto;
+    overflow: hidden;
+    border : 1px solid black;
+    width: var(--width);
+    height: var(--height);
+}
+
+game-peddle{
+    display: block;
+    position: absolute;
+    bottom: 5px;
+    background-color: var(--paddle-color);
+}
+
+pong-ball{
+    display: block;
+    position: absolute;
+    background-color: var(--ball-color);
+    border-radius: 50%;
+}
+
+#gameContainer {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    margin: auto;
+    overflow: hidden;
+    border: 1px solid #000;
+}
+
+#ball {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #0095DD;
+    border-radius: 50%;
+}
+
+#paddle {
+    position: absolute;
+    bottom: 0;
+    width: 160px;
+    height: 10px;
+    background-color: #0095DD;
+}
+
+.block {
+    width: 50px;
+    height: 20px;
+    background-color: #ff6347;
+    border: 1px solid #000;
+    position: absolute;
+}
