@@ -1,6 +1,8 @@
 //! stop its not worth the effort
 
 import { PongBall } from "./ball.js";
+import { BreakoutBlock } from "./block.js";
+import { BreakoutRow } from "./blockrow.js";
 import { Peddle } from "./peddle.js";
 
 //container config
@@ -10,9 +12,9 @@ const unit = 20;
 
 
 // Initial ball position and speed
-const velocity = 4;
-let ballSpeedX = 2;
-let ballSpeedY = 2;
+const velocity = 6;
+let ballSpeedX = velocity/2;
+let ballSpeedY = velocity/2;
 const ballSize = unit * 1;
 
 // Paddle configuration
@@ -27,13 +29,33 @@ let isRightKeyPressed = false;
 const blockWidth = unit * 4;
 const blockHeight = unit * 2;
 
+//temp 
+const lvl1 = [3,2,2,1,3,2,2,1,3,2,2,1,3,2,2,1,3,2,2,1,3,2,2];
+
+function areColliding(rectangle, circle) {
+  const rect = rectangle.getBoundingClientRect();
+  const circleRect = circle.getBoundingClientRect();
+
+  const circleCenterX = circleRect.left + circleRect.width / 2;
+  const circleCenterY = circleRect.top + circleRect.height / 2;
+
+  const rectClosestX = Math.max(rect.left, Math.min(circleCenterX, rect.right));
+  const rectClosestY = Math.max(rect.top, Math.min(circleCenterY, rect.bottom));
+
+  const distanceX = circleCenterX - rectClosestX;
+  const distanceY = circleCenterY - rectClosestY;
+  const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+
+  return distance < circleRect.width / 2;
+}
+
 
 class BreakoutContainer extends HTMLElement {
   constructor() {
     super();
     // ball and pedllle
     this.peddlle = new Peddle(paddleWidth, paddleHeight);
-    this.ball = new PongBall(ballSize, ballSpeedX, ballSpeedY);
+    this.ball = new PongBall(ballSize, velocity);
     this.runing = false;
 
     //set pressed keys to false
@@ -43,6 +65,10 @@ class BreakoutContainer extends HTMLElement {
 
   connectedCallback() {
     this.append(...[this.ball, this.peddlle]);
+      lvl1.forEach( row =>  {
+        this.append(new BreakoutRow(blockWidth,row));
+      });
+
     this.resize();
 
     //eventlistners
@@ -55,9 +81,9 @@ class BreakoutContainer extends HTMLElement {
     this.mainloop();
   }
 
+ 
   mainloop() {
     this.runing = true;
-
     this.lastFrameTime = performance.now();
     this.animate();
   }
@@ -77,35 +103,57 @@ class BreakoutContainer extends HTMLElement {
 
     //ball movement
     // Update ball position
-    let ballX = this.ball.x +  ballSpeedX;
-    let ballY = this.ball.y + ballSpeedY;
+    let ballX = this.ball.nextX;
+    let ballY = this.ball.nextY;
 
-    console.log(this.elementPoint(ballX  , ballY +ballSize).nodeName);
+    // console.log(this.elementPoint(ballX +(this.ball.right?ballSize : 0) , ballY +(this.ball.bottom? ballSize:0)).nodeName);
 
-    // Bounce off top and bottom
+    // Bounce off top
     if (ballY < 0 ) {
-      ballSpeedY = -ballSpeedY;
+     this.ball.speedY = -this.ball.speedY;
     }
     // bounce of sizeds
     else if(ballX < 0 || ballX > this.width - ballSize){
-      ballSpeedX = -ballSpeedX;
+      this.ball.speedX = -this.ball.speedX;
     }
     else if(ballY > this.height - ballSize){
       //we missed and drop below the paddle 
       //todo
+     this.ball.speedY = -this.ball.speedY;
     }
     //todo make more genral for blocks bounce of peddle
-    else if(this.elementPoint(ballX +ballSize , ballY +ballSize).nodeName != 'BREAKOUT-CONTAINER' ){
-
+    else if(this.elementPoint(this.ball.sideX , this.ball.sideY).nodeName != 'BREAKOUT-CONTAINER' ){
+      
       //we have a object in our path
-      const obstacle = this.elementPoint(ballX  +ballSize, ballY + ballSize);
+      const obstacle = this.elementPoint(this.ball.sideX, this.ball.sideY);
       if(obstacle == this.peddlle){
         //bounse of peddle
-        //todo make bigger
-        ballSpeedY = -ballSpeedY;
+        //todo make angle calc
+        this.peddlle.handleCollision(this.ball);
+        // if(this.ball.bottom) this.ball.speedY = -this.ball.speedY;
+      }
+      else if(obstacle.nodeName == 'BREAKOUT-BLOCK'){
+        obstacle.lives --;
+        switch(obstacle.getClosestSide(this.ball.nextCood)){
+          case 'top':
+            this.ball.speedY = -this.ball.speedY;
+          break;
+          case 'bottom':
+            this.ball.speedY = -this.ball.speedY;
+          break;
+          case'left':
+          this.ball.speedX = -this.ball.speedX;
+          break;
+          case'right':
+          this.ball.speedX = -this.ball.speedX;
+          break;
+        }
+      }
+      else if(obstacle.nodeName == 'BREAKOUT-ROW'){
+
       }
       else{
-        console.log('how we enterd here');
+        console.log('how we enterd here', obstacle);
       }
     }
 
@@ -144,6 +192,7 @@ class BreakoutContainer extends HTMLElement {
     return element;
   }
 
+
   handleKeyDown(e) {
     // check wich key is being hold down
     if (e.keyCode === 37 || e.keyCode === 65) { // arrow left and A key
@@ -152,6 +201,8 @@ class BreakoutContainer extends HTMLElement {
     else if (e.keyCode === 39 || e.keyCode === 68) { //arrow right and D key
       isRightKeyPressed = true;
     }
+    // so we can pause and cuntinu with pressing p
+    else if(e.keyCode == 80) this.runing ? this.stopLoop() : this.mainloop();
   }
   handleKeyUp(e) {
     if (e.keyCode === 37 || e.keyCode === 65) { // arrow left and A key
