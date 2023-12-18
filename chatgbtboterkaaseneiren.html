@@ -5,77 +5,110 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Boter, Kaas en Eieren</title>
   <style>
-    table {
-      border-collapse: collapse;
-    }
-
-    td {
-      width: 50px;
-      height: 50px;
-      border: 1px solid black;
-      text-align: center;
-      font-size: 24px;
-      cursor: pointer;
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
   </style>
 </head>
 <body>
+  <boter-kaas-eieren></boter-kaas-eieren>
+  <script>
+    class BoterKaasEieren extends HTMLElement {
+  constructor() {
+    super();
 
-<table id="gameBoard">
-  <tr>
-    <td onclick="makeMove(0, 0)"></td>
-    <td onclick="makeMove(0, 1)"></td>
-    <td onclick="makeMove(0, 2)"></td>
-  </tr>
-  <tr>
-    <td onclick="makeMove(1, 0)"></td>
-    <td onclick="makeMove(1, 1)"></td>
-    <td onclick="makeMove(1, 2)"></td>
-  </tr>
-  <tr>
-    <td onclick="makeMove(2, 0)"></td>
-    <td onclick="makeMove(2, 1)"></td>
-    <td onclick="makeMove(2, 2)"></td>
-  </tr>
-</table>
+    this.board = [
+      ['', '', ''],
+      ['', '', ''],
+      ['', '', '']
+    ];
 
-<script>
-  let board = [
-    ['', '', ''],
-    ['', '', ''],
-    ['', '', '']
-  ];
+    this.currentPlayer = 'X';
 
-  let currentPlayer = 'X';
+    this.attachShadow({ mode: 'open' });
+    this.render();
+    this.addEventListeners();
+  }
 
-  function printBoard() {
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
-        document.getElementById(`gameBoard`).rows[i].cells[j].innerHTML = board[i][j];
+  render() {
+    this.shadowRoot.innerHTML = `
+      <style>
+        table {
+          border-collapse: collapse;
+        }
+
+        td {
+          width: 50px;
+          height: 50px;
+          border: 1px solid black;
+          text-align: center;
+          font-size: 24px;
+          cursor: pointer;
+        }
+      </style>
+      <table>
+        <tr>
+          <td data-row="0" data-col="0"></td>
+          <td data-row="0" data-col="1"></td>
+          <td data-row="0" data-col="2"></td>
+        </tr>
+        <tr>
+          <td data-row="1" data-col="0"></td>
+          <td data-row="1" data-col="1"></td>
+          <td data-row="1" data-col="2"></td>
+        </tr>
+        <tr>
+          <td data-row="2" data-col="0"></td>
+          <td data-row="2" data-col="1"></td>
+          <td data-row="2" data-col="2"></td>
+        </tr>
+      </table>
+    `;
+    this.updateBoard();
+  }
+
+  updateBoard() {
+    const cells = this.shadowRoot.querySelectorAll('td');
+    cells.forEach((cell, index) => {
+      const row = Math.floor(index / 3);
+      const col = index % 3;
+      cell.textContent = this.board[row][col];
+    });
+  }
+
+  addEventListeners() {
+    this.shadowRoot.addEventListener('click', (event) => this.handleCellClick(event));
+  }
+
+  handleCellClick(event) {
+    if (event.target.tagName === 'TD') {
+      const row = parseInt(event.target.dataset.row);
+      const col = parseInt(event.target.dataset.col);
+
+      if (this.board[row][col] === '') {
+        this.board[row][col] = this.currentPlayer;
+        this.currentPlayer = this.currentPlayer === 'X' ? 'O' : 'X';
+        this.updateBoard();
+
+        const winner = this.checkWinner();
+        if (winner) {
+          alert(`Speler ${winner} wint!`);
+          this.resetGame();
+        } else if (this.isBoardFull()) {
+          alert('Gelijkspel!');
+          this.resetGame();
+        }
+      } else {
+        alert('Deze positie is al bezet. Kies een andere.');
       }
     }
   }
 
-  function makeMove(row, col) {
-    if (board[row][col] === '') {
-      board[row][col] = currentPlayer;
-      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-      printBoard();
-      
-      const winner = checkWinner();
-      if (winner) {
-        alert(`Speler ${winner} wint!`);
-        resetGame();
-      } else if (isBoardFull()) {
-        alert('Gelijkspel!');
-        resetGame();
-      }
-    } else {
-      alert('Deze positie is al bezet. Kies een andere.');
-    }
-  }
-
-  function checkWinner() {
+  checkWinner() {
   // Horizontaal en verticaal controleren
   for (let i = 0; i < 3; i++) {
     if (
@@ -98,10 +131,10 @@
 }
 
 
-  function isBoardFull() {
+  isBoardFull() {
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
-        if (board[i][j] === '') {
+        if (this.board[i][j] === '') {
           return false;
         }
       }
@@ -109,19 +142,19 @@
     return true;
   }
 
-  function resetGame() {
-    board = [
+  resetGame() {
+    this.board = [
       ['', '', ''],
       ['', '', ''],
       ['', '', '']
     ];
-    currentPlayer = 'X';
-    printBoard();
+    this.currentPlayer = 'X';
+    this.updateBoard();
   }
+}
 
-  // Initialisatie van het bord
-  printBoard();
-</script>
+customElements.define('boter-kaas-eieren', BoterKaasEieren);
 
+  </script>
 </body>
 </html>

@@ -52,10 +52,29 @@ class PongBall extends HTMLElement {
       return this.nextY +(this.bottom? this.size +0:-0);
     }
 
+    get coord(){
+      let obj = [];
+
+      const bound = this.getBoundingClientRect();
+      const r = bound.width/2
+      const x = bound.x + r;
+      const y = bound.y + r;
+      const ass = Math.abs(this.speedX)>Math.abs(this.speedY)? 'x' : 'y';
+
+      // check bigest movement 
+      //fill with coords and a extra pixel
+      if(this.left && ass == 'x')   obj = [x - r - 1,y];
+      if(this.right && ass == 'x')  obj = [x +r +1,y];
+      if(this.top && ass == 'y')    obj = [x,y-r-1];
+      if(this.bottom && ass == 'y') obj = [x , y+r+1];
+
+      return obj;
+    }
+
     get nextCood(){
       const bount = this.getBoundingClientRect();
-      const x = Math.round(bount.left + (this.right?this.size : 0));
-      const y = Math.round(bount.top + (this.bottom? this.size:0));
+      const x = Math.round(bount.left + (this.right?this.size : 0) +this.speedX);
+      const y = Math.round(bount.top + (this.bottom? this.size:0) + this.speedY);
       return [x,y];
     }
   

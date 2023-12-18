@@ -8,11 +8,11 @@ import { Peddle } from "./peddle.js";
 //container config
 const width = 1780;
 const height = width / 16 * 9;
-const unit = 20;
+const unit = 40;
 
 
 // Initial ball position and speed
-const velocity = 6;
+const velocity = 12;
 let ballSpeedX = velocity/2;
 let ballSpeedY = velocity/2;
 const ballSize = unit * 1;
@@ -30,25 +30,7 @@ const blockWidth = unit * 4;
 const blockHeight = unit * 2;
 
 //temp 
-const lvl1 = [3,2,2,1,3,2,2,1,3,2,2,1,3,2,2,1,3,2,2,1,3,2,2];
-
-function areColliding(rectangle, circle) {
-  const rect = rectangle.getBoundingClientRect();
-  const circleRect = circle.getBoundingClientRect();
-
-  const circleCenterX = circleRect.left + circleRect.width / 2;
-  const circleCenterY = circleRect.top + circleRect.height / 2;
-
-  const rectClosestX = Math.max(rect.left, Math.min(circleCenterX, rect.right));
-  const rectClosestY = Math.max(rect.top, Math.min(circleCenterY, rect.bottom));
-
-  const distanceX = circleCenterX - rectClosestX;
-  const distanceY = circleCenterY - rectClosestY;
-  const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-
-  return distance < circleRect.width / 2;
-}
-
+const lvl1 = [3,2,2,1,1,1];
 
 class BreakoutContainer extends HTMLElement {
   constructor() {
@@ -57,7 +39,7 @@ class BreakoutContainer extends HTMLElement {
     this.peddlle = new Peddle(paddleWidth, paddleHeight);
     this.ball = new PongBall(ballSize, velocity);
     this.runing = false;
-
+    this.style.setProperty('--unit-size', unit+'px');
     //set pressed keys to false
     this.isLeftKeyPressed = false;
     this.isRightKeyPressed = false;
@@ -80,7 +62,6 @@ class BreakoutContainer extends HTMLElement {
     //start animationloop
     this.mainloop();
   }
-
  
   mainloop() {
     this.runing = true;
@@ -122,10 +103,10 @@ class BreakoutContainer extends HTMLElement {
      this.ball.speedY = -this.ball.speedY;
     }
     //todo make more genral for blocks bounce of peddle
-    else if(this.elementPoint(this.ball.sideX , this.ball.sideY).nodeName != 'BREAKOUT-CONTAINER' ){
+    else if(this.elementPoint(this.ball.sideX , this.ball.sideY).nodeName != 'BREAKOUT-CONTAINER'){
       
       //we have a object in our path
-      const obstacle = this.elementPoint(this.ball.sideX, this.ball.sideY);
+      let obstacle = this.elementPoint(this.ball.sideX, this.ball.sideY);
       if(obstacle == this.peddlle){
         //bounse of peddle
         //todo make angle calc
@@ -178,9 +159,6 @@ class BreakoutContainer extends HTMLElement {
       this.peddlle.style.left = change + 'px';
     }
     //end peddle movement
-
-
-
     this.lastFrameTime = currentTime;
 
     // Call requestAnimationFrame recursively
@@ -190,7 +168,7 @@ class BreakoutContainer extends HTMLElement {
   elementPoint(x,y){
     const element = document.elementFromPoint(x + this.getBoundingClientRect().left, y + this.getBoundingClientRect().top);
     return element;
-  }
+  }  
 
 
   handleKeyDown(e) {

@@ -37,7 +37,7 @@ class Peddle extends HTMLElement {
         range = (impactpoint - halfbar) /halfbar ; 
         if(range > 0.9)range = 0.9;
       }
-      ball.speedX = ball.velocity * range;
+      ball.speedX = ball.velocity * range > ball.velocity-1? ball.velocity-1 : ball.velocity * range ;
       ball.speedY = (ball.velocity - Math.abs(ball.speedX)) *-1;
     }
 

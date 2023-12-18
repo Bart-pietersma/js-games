@@ -5,13 +5,14 @@
  --background : #333;
  --ball-color : rgb(175, 199, 201);
  --paddle-color : rgb(175, 199, 201);
- --block-color3 : #830c90;
+ --block-color3 : #b02bbe;
  --block-border3 : #830c90;
  --block-color2 : #50b223;
  --block-border2 : #258007;
  --block-color1 : #e14646;
- --block-border1 : #e14646;
- --unit-size : 20px;
+ --block-border1 : #981515;
+ /* replaced by inline style from js */
+ /* --unit-size : 20px; */
 
 }
 
@@ -70,6 +71,5 @@ pong-ball{
     display: block;
     position: absolute;
     background-color: var(--ball-color);
-    /* border-radius: 50%; */
     clip-path: circle(50% at 50% 50%);
 }
