@@ -36,6 +36,13 @@ class PongBall extends HTMLElement {
       return +this.style.top.substring(0,this.style.top.length-2);
     }
 
+    get centerCoords(){
+      const rect = this.getBoundingClientRect();
+      const x = rect.x + rect.width/2;
+      const y = rect.y + rect.height/2;
+    return {x,y}
+  }
+
     get nextX(){
       return  this.x +  this.speedX;
     }
@@ -50,6 +57,34 @@ class PongBall extends HTMLElement {
   
     get sideY(){
       return this.nextY +(this.bottom? this.size +0:-0);
+    }
+
+    get sides(){
+      //return 3 corner coords with next locatioin
+      const point1 = [this.nextX , this.nextY];
+      const point2 = [this.nextX + this.size , this.nextY];
+      const point3 = [this.nextX + this.size , this.nextY + this.size];
+      const point4 = [this.nextX , this.nextY + this.size];
+      const arr = [point1,point2,point3,point4];
+
+      //remove the 4th marker since it wil only spot the ball itself;
+      let elementToRemove = ''
+      switch(true){
+        case this.left && this.top:
+          elementToRemove = point3
+        break;
+        case this.left && this.bottom :
+          elementToRemove = point2
+        break;
+        case this.right && this.top:
+          elementToRemove = point4
+        break;
+        case this.right && this.bottom:
+          elementToRemove = point1
+        break;
+      }
+
+      return arr.filter(item => item !== elementToRemove);
     }
 
     get coord(){
@@ -77,7 +112,10 @@ class PongBall extends HTMLElement {
       const y = Math.round(bount.top + (this.bottom? this.size:0) + this.speedY);
       return [x,y];
     }
-  
+
+    get dir(){
+      return (this.speedX < 0? 'left.' : 'right.') + (this.speedY < 0? 'top' : 'bottom');
+    }
     get left(){
       return this.speedX < 0? true : false;
     }

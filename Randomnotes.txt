@@ -4,36 +4,3 @@ https://github.com/solitaire-game/solitaire-game.github.io
 
 
 
-breakout desing ratios
-
-1 unit atm = 20px
-ball 1/1
-peddle 8/1
-block 4/2
-
-
-//block placment logic 
-
-
-
-
-//ball bounce logic
-ball velicity = 100
-
-only angle change is when ball hits peddle center of peddly aims straig up
-and the furter away the less upward velocity it gets
-
-if peddle center then y = 100 x = 0
-if peddle edge then y = 10 x = 90
-
-impact point = (ball.left + ball.x) - pedlle.left 
-
-determine the % awway from center of peddel :
-center : 80
-impact point : 20
-
-distanse = Math.abs(center - impact point) / center = distance in %
-if distance < 0.1 then distance = 0.1;
-
-ball.y = velicity * distance
-ball.x = velicity - ball.x;

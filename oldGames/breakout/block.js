@@ -9,6 +9,13 @@ class BreakoutBlock extends HTMLElement {
       // You can perform additional actions when the element is connected to the DOM
     }
 
+    get centerCoords(){
+        const rect = this.getBoundingClientRect();
+        const x = rect.x + rect.width/2;
+        const y = rect.y + rect.height/2;
+      return {x,y}
+    }
+
     getClosestSide([x,y], element = this) {
         const rect = element.getBoundingClientRect();
         const distances = {

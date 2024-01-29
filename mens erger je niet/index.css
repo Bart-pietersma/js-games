@@ -1,0 +1,85 @@
+:root{
+    --color-team-1 : radial-gradient(#1100a9 35%, #2a0bd8 , #1100a9 50%);
+    --background-team-1 : #1100a9;
+    --color-team-2 : radial-gradient(#a90000 35%, #ff1c1c , #a90000 50%);
+    --background-team-2 : red;
+    --color-team-3 : radial-gradient(#00a922 35%, #0be100 , #00a922 50%);
+    --background-team-3 : green;
+    --color-team-4 : radial-gradient(#99c40c 35%, #93f50a , #99c40c 50%);
+    --background-team-4 : yellow;
+}
+
+roll-dice{
+    margin-inline: auto;
+    display: block;
+    width: 400px;
+}
+
+mens-erger-je-niet{
+    border: 3px solid cyan;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    margin: auto;
+    --square-color-1 : #ffffff00;
+    --square-size : 7vh;
+    --pawn-size : calc(var(--square-size) * 0.8);
+}
+
+niet-pawn{
+    width: var(--pawn-size);
+    height: var(--pawn-size);
+    border-radius: 50%;
+    box-shadow: 6px 6px 5px 5px rgba(0, 0, 0, 0.3);
+    border : 1px solid black;
+    pointer-events: none;
+}
+
+niet-pawn[player = "1"]{
+    background: var(--color-team-1);
+}
+niet-pawn[player = "2"]{
+    background: var(--color-team-2);
+}
+niet-pawn[player = "3"]{
+    background: var(--color-team-3);
+}
+niet-pawn[player = "4"]{
+    background: var(--color-team-4);
+}
+
+game-grid{
+    /* background: radial-gradient(circle at center, hotpink 0%, gold 100%); */
+    --border-size : 1vw;
+    --border-color : #f5f9b9
+}
+
+grid-tile{
+    border-radius: 35%;
+}
+
+game-grid grid-tile[path]{
+    background-color : white ;
+    border: 1px solid black;
+}
+
+game-grid grid-tile[basetile = "1"],game-grid grid-tile[starTile = "1"], game-grid grid-tile[finish='1']{
+    background-color: blue;
+    border: 1px solid black;
+}
+
+game-grid grid-tile[basetile = "2"],game-grid grid-tile[starTile = "2"],game-grid grid-tile[finish='2'] {
+    background-color: red;
+    border: 1px solid black;
+}
+
+game-grid grid-tile[basetile = "3"],game-grid grid-tile[starTile = "3"],game-grid grid-tile[finish='3']{
+    background-color: green;
+    border: 1px solid black;
+}
+
+game-grid grid-tile[basetile = "4"],game-grid grid-tile[starTile = "4"],game-grid grid-tile[finish='4']{
+    background-color: yellow;
+    border: 1px solid black;
+}

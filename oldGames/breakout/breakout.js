@@ -30,7 +30,7 @@ const blockWidth = unit * 4;
 const blockHeight = unit * 2;
 
 //temp 
-const lvl1 = [3,2,2,1,1,1];
+const lvl1 = [3,2,2,1,1,1,3,2,1];
 
 class BreakoutContainer extends HTMLElement {
   constructor() {
@@ -87,7 +87,11 @@ class BreakoutContainer extends HTMLElement {
     let ballX = this.ball.nextX;
     let ballY = this.ball.nextY;
 
-    // console.log(this.elementPoint(ballX +(this.ball.right?ballSize : 0) , ballY +(this.ball.bottom? ballSize:0)).nodeName);
+    // looking for obstecals from the balls point of fiev by looking at 3 sides of the ball
+    const obstacles = this.ball.sides.map(side => {
+     const ele = this.elementPointnew(side);
+     return ele.nodeName == 'BREAKOUT-BLOCK' && ele || ele.nodeName == 'GAME-PEDDLE' && ele
+    }).filter(n => n);
 
     // Bounce off top
     if (ballY < 0 ) {
@@ -103,10 +107,13 @@ class BreakoutContainer extends HTMLElement {
      this.ball.speedY = -this.ball.speedY;
     }
     //todo make more genral for blocks bounce of peddle
-    else if(this.elementPoint(this.ball.sideX , this.ball.sideY).nodeName != 'BREAKOUT-CONTAINER'){
+    else if(obstacles.length > 0){
       
       //we have a object in our path
-      let obstacle = this.elementPoint(this.ball.sideX, this.ball.sideY);
+      let obstacle = '';
+      if(obstacles.length == 1) obstacle = obstacles.flat();
+      else if(obstacles[0] == obstacles[1]) obstacle = obstacles[0];
+      else obstacle = this.findCloserPoint(this.ball,obstacles[0], obstacles[1]);
       if(obstacle == this.peddlle){
         //bounse of peddle
         //todo make angle calc
@@ -169,6 +176,28 @@ class BreakoutContainer extends HTMLElement {
     const element = document.elementFromPoint(x + this.getBoundingClientRect().left, y + this.getBoundingClientRect().top);
     return element;
   }  
+
+  elementPointnew([x,y]){
+    const element = document.elementFromPoint(x + this.getBoundingClientRect().left, y + this.getBoundingClientRect().top);
+    return element;
+  }  
+
+  calculateDistance(pointA, pointB) {
+    return Math.sqrt(Math.pow(pointB.x - pointA.x, 2) + Math.pow(pointB.y - pointA.y, 2));
+  }
+  
+  findCloserPoint(pointA, pointB, pointC) {
+    const distanceAB = this.calculateDistance(pointA.centerCoords, pointB.centerCoords);
+    const distanceAC = this.calculateDistance(pointA.centerCoords, pointC.centerCoords);
+  
+    if (distanceAB < distanceAC) {
+      return pointB;
+    } else if (distanceAC < distanceAB) {
+      return pointC;
+    } else {
+      return pointB;
+    }
+  }
 
 
   handleKeyDown(e) {
