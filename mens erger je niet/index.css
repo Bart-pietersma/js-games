@@ -1,18 +1,23 @@
 :root{
-    --color-team-1 : radial-gradient(#1100a9 35%, #2a0bd8 , #1100a9 50%);
-    --background-team-1 : #1100a9;
-    --color-team-2 : radial-gradient(#a90000 35%, #ff1c1c , #a90000 50%);
-    --background-team-2 : red;
-    --color-team-3 : radial-gradient(#00a922 35%, #0be100 , #00a922 50%);
-    --background-team-3 : green;
-    --color-team-4 : radial-gradient(#99c40c 35%, #93f50a , #99c40c 50%);
-    --background-team-4 : yellow;
+    --background-team-1 : #0e46ee;
+    --c1 : #0e46ee;
+    --color-team-1 : radial-gradient(var(--c1) 35%, #01acfc , var(--c1) 50%);
+    --background-team-2 : #a90000;
+    --c2 : #a90000 ;
+    --color-team-2 : radial-gradient(var(--c2) 35%, #ff1c1c , var(--c2) 50%);
+    --background-team-3 : #00a922;
+    --c3 : #00a922 ;
+    --color-team-3 : radial-gradient(var(--c3) 35%, #0be100 , var(--c3) 50%);
+    --background-team-4 : #99c40c;
+    --c4 : #fbff00 ;
+    --color-team-4 : radial-gradient(var(--c4) 35%, #d8eb0a , var(--c4) 50%);
 }
 
 roll-dice{
-    margin-inline: auto;
-    display: block;
-    width: 400px;
+    z-index: 1;
+    position: absolute;
+    left: calc(50% - 150px);
+
 }
 
 mens-erger-je-niet{
@@ -25,6 +30,22 @@ mens-erger-je-niet{
     --square-color-1 : #ffffff00;
     --square-size : 7vh;
     --pawn-size : calc(var(--square-size) * 0.8);
+}
+
+mens-erger-je-niet[turn="1"]{
+    border-color: var(--background-team-1);
+}
+
+mens-erger-je-niet[turn="2"]{
+    border-color: var(--background-team-2);
+}
+
+mens-erger-je-niet[turn="3"]{
+    border-color: var(--background-team-3);
+}
+
+mens-erger-je-niet[turn="4"]{
+    border-color: var(--background-team-4);
 }
 
 niet-pawn{
@@ -50,7 +71,6 @@ niet-pawn[player = "4"]{
 }
 
 game-grid{
-    /* background: radial-gradient(circle at center, hotpink 0%, gold 100%); */
     --border-size : 1vw;
     --border-color : #f5f9b9
 }
@@ -65,7 +85,7 @@ game-grid grid-tile[path]{
 }
 
 game-grid grid-tile[basetile = "1"],game-grid grid-tile[starTile = "1"], game-grid grid-tile[finish='1']{
-    background-color: blue;
+    background-color: var(--background-team-1);
     border: 1px solid black;
 }
 

@@ -9,15 +9,19 @@ class Pawn extends HTMLElement{
     }
 
     get grid(){
-        return 
+        return this.tile.parentElement.nodeName == 'GAME-GRID' ? this.tile.parentElement : 'not in the grid';
     }
 
     get tile(){
-
+        return this.parentElement.nodeName == 'GRID-TILE' ? this.parentElement : 'not in the grid';
     }
 
     move(amount){
 
+    }
+
+    get onBase(){
+        return this.tile.getAttribute('basetile') ? true : false;
     }
 
 }

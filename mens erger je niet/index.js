@@ -1,28 +1,57 @@
 import { GameGrid } from "https://rtdb.nl/bplib/grid.js";
+import {animatePiece} from "https://rtdb.nl/functions.js";
 import { Pawn } from "./pawn.js";
 
 class MensErgerJeNiet extends HTMLElement {
     constructor() {
       super();
-        this.grid = new GameGrid(11,11,{pattern : 'none', draggable:true});
+        this.grid = new GameGrid(11,11,{pattern : 'none', playerCount : 4 , draggable:true});
+        this.turn = 1
     }
 
     connectedCallback() {
       this.createBoard();
       this.placePawns();
+      this.setAttribute('turn',this.turn);
+      this.grid.setDragable();
 
       //add eventlistners
       document.addEventListener('gamegriddrop', e => this.drophandler(e));
       document.addEventListener('griddragstart', e => this.onDragstart(e));
+      document.addEventListener('roll-dice', e => this.diceRoll(e));
     
     }
 
-    onDragstart(e){
+    diceRoll(e){
+      console.log(e);
+      const diceValue = e.detail.dice[0].value;
+      console.log(diceValue);
+
+      //check if player can play
+      if(diceValue == 6 || this.playerPiecesInPlay.length > 0){
+
+      }
+      //player cant play skip turn
+      else{
+        this.changeTurn();
+      }
 
     }
 
-    drophandler(e){
+    onDragstart(e){
+      const piece = e.detail.piece;
+      
+    }
 
+    drophandler(e){
+      console.log(e.detail);
+      e.detail.from.append(e.detail.piece);
+    }
+
+    changeTurn(){
+      this.turn ++;
+      this.setAttribute('turn', this.turn);
+      this.grid.changeTurn(this.turn);
     }
 
     createBoard(){
@@ -96,6 +125,16 @@ class MensErgerJeNiet extends HTMLElement {
 
     get corners(){
       return this.grid.getCells([[0,0],[this.grid.x -1 , 0],[this.grid.x-1,this.grid.y-1],[0,this.grid.y-1]]);
+    }
+
+    get playerPiecesInPlay(){
+      return this.playerPieces.filter(piece => {
+        if(!piece.onBase)piece;
+      });
+    }
+
+    get playerPieces(){
+      return Array.from(this.querySelectorAll(`niet-pawn[player="${this.turn}"]`));
     }
 
   }
