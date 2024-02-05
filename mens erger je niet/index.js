@@ -23,35 +23,54 @@ class MensErgerJeNiet extends HTMLElement {
     }
 
     diceRoll(e){
+      e = e.detail;
       console.log(e);
-      const diceValue = e.detail.dice[0].value;
-      console.log(diceValue);
+      if(e.name == 'dice-throw-start'){
 
-      //check if player can play
-      if(diceValue == 6 || this.playerPiecesInPlay.length > 0){
+      }else if(e.name == 'dice-rolled'){
+        const diceValue = e.dice[0].value;
 
+        //check if player can play
+        if(diceValue == 6 || this.playerPiecesInPlay.length > 0){
+          console.log('we can play');
+
+        }
+        //player cant play skip turn
+        else{
+  
+          this.changeTurn();
+          this.dice.roll();
+        }
       }
-      //player cant play skip turn
-      else{
-        this.changeTurn();
-      }
-
     }
 
     onDragstart(e){
       const piece = e.detail.piece;
+      const move = [piece.moveTiles];
+      console.log(move);
+      this.grid.setMoves({move});
       
     }
 
     drophandler(e){
-      console.log(e.detail);
-      e.detail.from.append(e.detail.piece);
+      e = e.detail;
+      if(e.target.moveType){
+        //we can move here
+        animatePiece(e.target,e.piece);
+      }
+      else{
+        //wrong move return piece
+        animatePiece(e.from,e.piece);
+      }
+      this.grid.clearMoves();
+      // e.detail.from.append(e.detail.piece);
     }
 
     changeTurn(){
       this.turn ++;
+      if(this.turn > 4) this.turn = this.turn % 4;
       this.setAttribute('turn', this.turn);
-      this.grid.changeTurn(this.turn);
+      this.grid.changeTurn();
     }
 
     createBoard(){
@@ -72,7 +91,7 @@ class MensErgerJeNiet extends HTMLElement {
       //seting the corner tiles
       let i = 1;
       this.corners.map(cell => {
-        const cells = cell.adjacentCells
+        const cells = cell.adjacentCells;
         cells.push(cell);
         cells.map(cell => cell.setAttribute('baseTile' , i ));
         i++;
@@ -105,6 +124,19 @@ class MensErgerJeNiet extends HTMLElement {
       return Array.from(this.querySelectorAll(`[finish="${team}"]`));
     }
 
+    get playerpath(){
+      // make a coppie of the path then change the startingpoint
+      const path = this.walkingPath.slice();
+      const x = (this.turn -1) *10;
+      for(let i = 0; i < x ; i++){
+        let tile = path.shift();
+        path.push(tile);
+      }
+      //add the player ending tiles to the path
+      path.push(...this.finishTiles);
+      return path;
+    }
+
     //default path
     get defaultPath(){
       return [
@@ -129,12 +161,24 @@ class MensErgerJeNiet extends HTMLElement {
 
     get playerPiecesInPlay(){
       return this.playerPieces.filter(piece => {
-        if(!piece.onBase)piece;
+        if(!piece.onBase)return piece;
       });
     }
 
     get playerPieces(){
       return Array.from(this.querySelectorAll(`niet-pawn[player="${this.turn}"]`));
+    }
+
+    get finishTiles(){
+      return Array.from(this.querySelectorAll(`grid-tile[finish="${this.turn}"]`));
+    }
+
+    get dice(){
+      return document.querySelector('roll-dice');
+    }
+
+    get diceValue(){
+      return this.dice.dice[0].value;
     }
 
   }
