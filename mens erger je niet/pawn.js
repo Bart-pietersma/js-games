@@ -45,10 +45,15 @@ class Pawn extends HTMLElement{
 
     get moveTiles(){
         const diceroll = this.board.diceValue;
-        console.log(diceroll);
         if(this.onBase && diceroll == 6 && this.path[0].piece?.team != this.team) return this.path[0];
         else if(this.onFinish)return false;
-        else return this.path[this.location + diceroll];
+        else if(!this.onBase){
+            //todo fix when going past end
+            const tile = this.path[this.location + diceroll];
+            if(tile.piece?.team != this.team)return tile; 
+            return false;
+        }
+        return false;
     }
 
 }

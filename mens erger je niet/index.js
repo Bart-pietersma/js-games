@@ -2,6 +2,8 @@ import { GameGrid } from "https://rtdb.nl/bplib/grid.js";
 import {animatePiece} from "https://rtdb.nl/functions.js";
 import { Pawn } from "./pawn.js";
 
+//todo handle win
+//todo walk backwarts when going past
 class MensErgerJeNiet extends HTMLElement {
     constructor() {
       super();
@@ -26,7 +28,7 @@ class MensErgerJeNiet extends HTMLElement {
       e = e.detail;
       console.log(e);
       if(e.name == 'dice-throw-start'){
-
+        this.toggleBlockDice(true);
       }else if(e.name == 'dice-rolled'){
         const diceValue = e.dice[0].value;
 
@@ -34,6 +36,10 @@ class MensErgerJeNiet extends HTMLElement {
         if(diceValue == 6 || this.playerPiecesInPlay.length > 0){
           console.log('we can play');
 
+          //todo need to resolve race conflict with moveto
+          this.diceObj.moveTo({x:0,y:0,z:0});
+          
+          this.toggleBlockPieces(false);
         }
         //player cant play skip turn
         else{
@@ -46,9 +52,9 @@ class MensErgerJeNiet extends HTMLElement {
 
     onDragstart(e){
       const piece = e.detail.piece;
-      const move = [piece.moveTiles];
-      console.log(move);
-      this.grid.setMoves({move});
+      if(piece.moveTiles){
+        this.grid.setMoves({move :[piece.moveTiles]});
+      }
       
     }
 
@@ -56,7 +62,21 @@ class MensErgerJeNiet extends HTMLElement {
       e = e.detail;
       if(e.target.moveType){
         //we can move here
+        //check if other pawn is there then return that to base
+        if(e.target.piece){
+          const enemy = e.target.piece;
+          const base = this.getEmptyBase(enemy.team);
+          animatePiece(base,enemy);
+        }
         animatePiece(e.target,e.piece);
+        if(this.diceValue == 6){
+          //update draggable so new location is set
+          this.grid.setDragable();
+          this.toggleBlockDice(false);
+          this.toggleBlockPieces(true);
+        }
+        else this.changeTurn();
+
       }
       else{
         //wrong move return piece
@@ -71,6 +91,7 @@ class MensErgerJeNiet extends HTMLElement {
       if(this.turn > 4) this.turn = this.turn % 4;
       this.setAttribute('turn', this.turn);
       this.grid.changeTurn();
+      this.toggleBlockDice(false);
     }
 
     createBoard(){
@@ -118,6 +139,10 @@ class MensErgerJeNiet extends HTMLElement {
 
     getBase(team = 1){
       return Array.from(this.querySelectorAll(`[basetile="${team}"]`));
+    }
+
+    getEmptyBase(team =1){
+      return this.querySelector(`[basetile="${team}"]:empty`);
     }
 
     getFinish(team = 1){
@@ -175,6 +200,17 @@ class MensErgerJeNiet extends HTMLElement {
 
     get dice(){
       return document.querySelector('roll-dice');
+    }
+
+    get diceObj(){
+      return this.dice.dice[0];
+    }
+
+    toggleBlockDice(force){
+      this.dice.toggleAttribute('block',force);
+    }
+    toggleBlockPieces(force){
+      this.playerPieces.forEach(piece => piece.tile.toggleAttribute('block', force));
     }
 
     get diceValue(){

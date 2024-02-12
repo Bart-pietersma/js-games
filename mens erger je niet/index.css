@@ -16,8 +16,16 @@
 roll-dice{
     z-index: 1;
     position: absolute;
-    left: calc(50% - 150px);
+    /* left: calc(50% - 150px); */
 
+}
+
+roll-dice canvas{
+    width: calc(var(--square-size) * 11 + 15vh);
+}
+
+[block]{
+    pointer-events: none;
 }
 
 mens-erger-je-niet{
@@ -25,6 +33,7 @@ mens-erger-je-niet{
     display: grid;
     justify-content: center;
     align-items: center;
+    justify-items: center;
     width: fit-content;
     margin: auto;
     --square-color-1 : #ffffff00;
