@@ -180,6 +180,10 @@ class MensErgerJeNiet extends HTMLElement {
       ]
     }
 
+    get checkwin(){
+      return false;
+    }
+
     get corners(){
       return this.grid.getCells([[0,0],[this.grid.x -1 , 0],[this.grid.x-1,this.grid.y-1],[0,this.grid.y-1]]);
     }
