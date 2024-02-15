@@ -69,6 +69,11 @@ class MensErgerJeNiet extends HTMLElement {
           animatePiece(base,enemy);
         }
         animatePiece(e.target,e.piece);
+        //check for winncondition
+        if(this.checkwin){
+          //todo
+        }
+        //check for second trow
         if(this.diceValue == 6){
           //update draggable so new location is set
           this.grid.setDragable();
@@ -181,7 +186,8 @@ class MensErgerJeNiet extends HTMLElement {
     }
 
     get checkwin(){
-      return false;
+      return this.querySelectorAll(`grid-tile[finish="${this.turn}"]:has(*)`).length == 4? true : false;
+      
     }
 
     get corners(){
