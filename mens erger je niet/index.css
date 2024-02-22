@@ -16,12 +16,13 @@
 roll-dice{
     z-index: 1;
     position: absolute;
-    /* left: calc(50% - 150px); */
-
 }
 
 roll-dice canvas{
-    width: calc(var(--square-size) * 11 + 15vh);
+    --amount : 7;
+    --size : calc(((var(--square-size) + 1vh) * var(--amount) ) - 1vh );
+    width: var(--size);
+    height:var(--size);
 }
 
 [block]{
@@ -80,7 +81,7 @@ niet-pawn[player = "4"]{
 }
 
 game-grid{
-    --border-size : 1vw;
+    --border-size : 1vh;
     --border-color : #f5f9b9
 }
 

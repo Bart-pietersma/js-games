@@ -70,9 +70,7 @@ class MensErgerJeNiet extends HTMLElement {
         }
         animatePiece(e.target,e.piece);
         //check for winncondition
-        if(this.checkwin){
-          //todo
-        }
+        if(this.checkwin) this.handleWin();
         //check for second trow
         if(this.diceValue == 6){
           //update draggable so new location is set
@@ -133,6 +131,12 @@ class MensErgerJeNiet extends HTMLElement {
         cells.map(cell => cell.setAttribute('finish', i));
       }
 
+    }
+
+    //win
+    handleWin(){
+      //todo 
+      
     }
     
     // init for placing the pawns

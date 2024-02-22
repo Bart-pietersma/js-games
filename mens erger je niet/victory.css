@@ -1,0 +1,49 @@
+
+victory-screen{
+    display: flex;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    background-color: #00000050;
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+    overflow: hidden;
+}
+
+victory-screen #msg{
+    padding: 50px;
+    background-color: bisque;
+    border : 3px dashed hotpink;
+    transform: rotate3d(1, 1, 1, 45deg);
+}
+
+victory-screen [confeti]{
+    width: 10px;
+  height: 10px;
+  position: absolute;
+  border-radius: 50%;
+  transform-origin: 50% 50%;
+  animation: confettiAnimation 4s linear infinite;
+}
+
+
+@keyframes confettiAnimation {
+    0% {
+      transform: translateY(0) rotate3d(1, 0, 0, 0) translateX(0) ;
+    }
+    25% {
+      transform: translateY(40vh) rotate3d(1, 0, 1, 90deg) translateX(var(--swing1)) ;
+    }
+    50% {
+      transform: translateY(80vh) rotate3d(1, 0, 0, 45deg) translateX(var(--swing2)) ;
+    }
+    75% {
+      transform: translateY(120vh) rotate3d(0, 1, 0, 90deg) translateX(var(--swing3)) ;
+    }
+    100% {
+      transform: translateY(160vh) rotate3d(1, 0, 0, 45deg);
+    }
+  }
