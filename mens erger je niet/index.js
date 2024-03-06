@@ -37,7 +37,9 @@ class MensErgerJeNiet extends HTMLElement {
           console.log('we can play');
 
           //todo need to resolve race conflict with moveto
-          this.diceObj.moveTo({x:0,y:0,z:0});
+          setTimeout(() => {
+            this.diceObj.moveTo({x:0,y:0,z:0});
+          }, 10);
           
           this.toggleBlockPieces(false);
         }

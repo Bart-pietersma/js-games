@@ -19,7 +19,7 @@ roll-dice{
 }
 
 roll-dice canvas{
-    --amount : 7;
+    --amount : 11;
     --size : calc(((var(--square-size) + 1vh) * var(--amount) ) - 1vh );
     width: var(--size);
     height:var(--size);
