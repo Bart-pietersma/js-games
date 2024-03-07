@@ -1,14 +1,23 @@
 import { GameGrid } from "https://rtdb.nl/bplib/grid.js";
 import {animatePiece} from "https://rtdb.nl/functions.js";
 import { Pawn } from "./pawn.js";
+import {RtSocket} from "https://rtdb.nl/rtsocket.js";
 
-//todo handle win
+import { EndScreen } from "https://rtdb.nl/bplib/end-screen.js";
+//! simulate other mouses to give a more inclusive veeling ?
 //todo walk backwarts when going past
+/* 
+seprate dice and move comands for ws?
+make die sides svgs to whow other players trown dice
+
+
+*/
 class MensErgerJeNiet extends HTMLElement {
     constructor() {
       super();
         this.grid = new GameGrid(11,11,{pattern : 'none', playerCount : 4 , draggable:true});
         this.turn = 1
+        this.socket = new RtSocket();
     }
 
     connectedCallback() {
@@ -21,7 +30,17 @@ class MensErgerJeNiet extends HTMLElement {
       document.addEventListener('gamegriddrop', e => this.drophandler(e));
       document.addEventListener('griddragstart', e => this.onDragstart(e));
       document.addEventListener('roll-dice', e => this.diceRoll(e));
+
+      //ws evt
+      document.addEventListener('db-echo', e => this.handleSocket(e));
     
+    }
+
+    handleSocket(e){
+      //todo
+      //is going to give dice number and pawn move?
+      console.log(e);
+
     }
 
     diceRoll(e){
@@ -35,19 +54,13 @@ class MensErgerJeNiet extends HTMLElement {
         //check if player can play
         if(diceValue == 6 || this.playerPiecesInPlay.length > 0){
           console.log('we can play');
-
-          //todo need to resolve race conflict with moveto
-          setTimeout(() => {
-            this.diceObj.moveTo({x:0,y:0,z:0});
-          }, 10);
-          
           this.toggleBlockPieces(false);
         }
         //player cant play skip turn
         else{
-  
-          this.changeTurn();
-          this.dice.roll();
+          this.toggleBlockDice(false);
+          // this.changeTurn();
+          // this.dice.roll();
         }
       }
     }
@@ -92,6 +105,7 @@ class MensErgerJeNiet extends HTMLElement {
     }
 
     changeTurn(){
+      //todo implement multiplayer with the information of the given turn ?
       this.turn ++;
       if(this.turn > 4) this.turn = this.turn % 4;
       this.setAttribute('turn', this.turn);
@@ -138,7 +152,7 @@ class MensErgerJeNiet extends HTMLElement {
     //win
     handleWin(){
       //todo 
-      
+      this.append(new EndScreen(`${this.player} `));
     }
     
     // init for placing the pawns
@@ -204,6 +218,11 @@ class MensErgerJeNiet extends HTMLElement {
       return this.playerPieces.filter(piece => {
         if(!piece.onBase)return piece;
       });
+    }
+
+    get player(){
+      const arr = ['blauw','rood','groen','geel'];
+      return arr[this.turn];
     }
 
     get playerPieces(){
