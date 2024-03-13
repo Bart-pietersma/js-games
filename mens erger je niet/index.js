@@ -6,11 +6,15 @@ import {RtSocket} from "https://rtdb.nl/rtsocket.js";
 import { EndScreen } from "https://rtdb.nl/bplib/end-screen.js";
 //! simulate other mouses to give a more inclusive veeling ?
 //todo walk backwarts when going past
+//todo fix the end tiles to count from the correct side
 /* 
 seprate dice and move comands for ws?
 make die sides svgs to whow other players trown dice
 
-
+cros msg locations
+change turn?
+rolldice ?
+drophandler?
 */
 class MensErgerJeNiet extends HTMLElement {
     constructor() {
@@ -37,6 +41,7 @@ class MensErgerJeNiet extends HTMLElement {
     }
 
     handleSocket(e){
+      e = e.detail;
       //todo
       //is going to give dice number and pawn move?
       console.log(e);
@@ -50,6 +55,8 @@ class MensErgerJeNiet extends HTMLElement {
         this.toggleBlockDice(true);
       }else if(e.name == 'dice-rolled'){
         const diceValue = e.dice[0].value;
+        //todo send to others the rolled dice.
+        this.socket.testMsg({'action' : 'echo', diceValue});
 
         //check if player can play
         if(diceValue == 6 || this.playerPiecesInPlay.length > 0){
@@ -58,9 +65,8 @@ class MensErgerJeNiet extends HTMLElement {
         }
         //player cant play skip turn
         else{
-          this.toggleBlockDice(false);
-          // this.changeTurn();
           // this.dice.roll();
+          this.changeTurn();
         }
       }
     }

@@ -4,3 +4,19 @@ https://github.com/solitaire-game/solitaire-game.github.io
 
 
 
+game select menu / social envoirment
+
+elke game een menu geven met play join en een img based mainpage die naar de gamepages gaat en global multieplayer lijst van alle open games?
+hoe voeg je game to aan het systeem
+de gamepage customelement maaken met de game / src als waarden
+need:
+    menu:
+        manier on game te selecteren single/multi
+        manier om een game the joinen 
+        opties:
+            darkmode
+            naamwijzegen
+            ect
+    vriendenlijst
+    chatbox
+
