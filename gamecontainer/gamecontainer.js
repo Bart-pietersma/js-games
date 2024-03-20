@@ -10,7 +10,7 @@ class GameContainer extends HTMLElement{
         //todo localstorage check for user
 
         //ws
-        // document.ws = new RtSocket;
+        document.ws = new RtSocket;
     }
 
     get playerData(){

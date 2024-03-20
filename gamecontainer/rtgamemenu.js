@@ -10,13 +10,27 @@ need to be menu with buttens to instance the game provided in the src and the jo
 */
 
 class RtGameMenu extends HTMLElement{
-    constructor(name,src,multi = false){
+    constructor(){
         super()
+        const ws = document.ws;
+        const attr = document.querySelector(`game-container`).attributes;
+        console.log(attr.name.value);
+
+        //make buttons
+        const speel = document.createElement(`button`);
+        speel.id = 'speelknop';
+        speel.textContent = 'speel';
+        const samen = document.createElement('button');
+        samen.id = `joinknop`;
+        samen.textContent='samen speelen';
+        speel.onclick = () => {ws.makeGame(attr.name.value,'test',attr.maxplayers.value,attr.boardinfo.value)};
+        samen.onclick = () => {};
+        this.append(...[speel,samen]);
 
     }
 
-    connectedCallback(){
 
+    connectedCallback(){
     }
 
     closestElement(selector, el = this) {
@@ -26,9 +40,6 @@ class RtGameMenu extends HTMLElement{
         );
     }
 
-    makebuttons(){
-        
-    }
 
 
 
