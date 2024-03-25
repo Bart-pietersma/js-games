@@ -2,7 +2,6 @@ import { GameGrid } from "https://rtdb.nl/bplib/grid.js";
 import {animatePiece} from "https://rtdb.nl/functions.js";
 import { Pawn } from "./pawn.js";
 import {RtSocket} from "https://rtdb.nl/rtsocket.js";
-
 import { EndScreen } from "https://rtdb.nl/bplib/end-screen.js";
 //! simulate other mouses to give a more inclusive veeling ?
 //todo walk backwarts when going past
@@ -21,7 +20,17 @@ class MensErgerJeNiet extends HTMLElement {
       super();
         this.grid = new GameGrid(11,11,{pattern : 'none', playerCount : 4 , draggable:true});
         this.turn = 1
-        this.socket = new RtSocket();
+        this.socket = document.ws? document.ws : new RtSocket();
+        //get the dice for the board and setting some values to it
+        //todo change the dice so i can instance the class with the params
+        import("https://roll-dice.github.io/element.js").then((module) => {
+          const dice = document.createElement('roll-dice');
+          dice.setAttribute('dicecount',1);
+          dice.setAttribute('aligndiceY',0);
+          dice.setAttribute('doubleclick', true);
+          dice.toggleAttribute('block',true);
+          this.append(dice);
+      })
     }
 
     connectedCallback() {
@@ -261,3 +270,4 @@ class MensErgerJeNiet extends HTMLElement {
   }
 
   customElements.define('mens-erger-je-niet', MensErgerJeNiet);
+  export{MensErgerJeNiet};

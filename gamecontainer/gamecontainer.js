@@ -1,16 +1,22 @@
 import { RTChatbox } from 'https://rtdb.nl/rtchatbox.js';
 import { RtSocket} from "https://rtdb.nl/rtsocket.js";
 import { RtGameMenu } from './rtgamemenu.js';
-
+import { importCss } from '../functions.js';
+// import { MensErgerJeNiet } from "../mens erger je niet/index.js";
 
 class GameContainer extends HTMLElement{
     constructor(){
         super()
-
+        //import the 
+        import(this.src).then((module) =>{
+            this.game = module[this.gameName]
+            //load samenamed css file
+            importCss(this.src.slice(0,-2)+'css');
+        });
         //todo localstorage check for user
 
         //ws
-        document.ws = new RtSocket;
+        // document.ws = new RtSocket;
     }
 
     get playerData(){
@@ -31,7 +37,7 @@ class GameContainer extends HTMLElement{
     get src(){
         return this.getAttribute('src');
     }
-    get name(){
+    get gameName(){
         return this.getAttribute('name');
     }
 
@@ -58,7 +64,8 @@ class GameContainer extends HTMLElement{
     }
 
     makeBoard(e){
-        //todo remake to make implement generic game
+        const game = new this.game();
+        this.append(game);
 
     }
     loadGame(e){

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        class MyClass {
+            constructor(x) {
+                this.x = x;
+            }
+        }
+
+        const className = "MyClass";
+        const instance = new (eval(className))(5);
+
+        console.log(instance.x); // Output: 5
+    </script>
+</body>
+
+</html>
