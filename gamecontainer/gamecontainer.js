@@ -8,6 +8,9 @@ class GameContainer extends HTMLElement{
     constructor(){
         super()
         //import the 
+        if(window.location.href.split('?')[1].length > 0){
+            //we have a joinrequest
+        };
         import(this.src).then((module) =>{
             this.game = module[this.gameName]
             //load samenamed css file
@@ -16,7 +19,7 @@ class GameContainer extends HTMLElement{
         //todo localstorage check for user
 
         //ws
-        // document.ws = new RtSocket;
+        this.ws = new RtSocket(this);
     }
 
     get playerData(){
@@ -31,9 +34,6 @@ class GameContainer extends HTMLElement{
         return this.playerData.userName;
     }
 
-    get ws(){
-        return document.ws;
-    }
     get src(){
         return this.getAttribute('src');
     }
@@ -42,12 +42,13 @@ class GameContainer extends HTMLElement{
     }
 
     connectedCallback(){
+        this.setEventListners();
         this.makeGameMenu();
 
     }
 
     setEventListners(){
-        document.addEventListener(`db-newgame`, e => this.makeBoard(e));
+        this.addEventListener(`db-newgame`, e => this.makeBoard(e));
         document.addEventListener(`db-joinGame`, e => this.makeBoard(e));
         document.addEventListener(`db-getOpenGames`, e => this.makeLobyBrowser(e));
     }
@@ -60,11 +61,14 @@ class GameContainer extends HTMLElement{
 
     makeGameMenu(){
         this.clear();
-        this.append(new RtGameMenu(this.name,this.src));
+        this.append(new RtGameMenu(this));
     }
 
     makeBoard(e){
+        console.log(123);
+        this.clear();
         const game = new this.game();
+        // game.id = e.detail.id;
         this.append(game);
 
     }

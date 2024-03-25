@@ -8,11 +8,12 @@ need to be menu with buttens to instance the game provided in the src and the jo
         samen spelen
 
 */
+//todo change join to id and or make a invite link
 
 class RtGameMenu extends HTMLElement{
-    constructor(){
+    constructor(instantor){
         super()
-        const ws = document.ws;
+        const ws = instantor.ws;
         const attr = document.querySelector(`game-container`).attributes;
         console.log(attr.name.value);
 
