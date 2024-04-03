@@ -8,10 +8,11 @@ class GameContainer extends HTMLElement{
     constructor(){
         super()
         //import the 
-        if(window.location.href.split('?')[1].length > 0){
+        if(window.location.search.length > 0){
             //we have a joinrequest
         };
         import(this.src).then((module) =>{
+            console.log(module);
             this.game = module[this.gameName]
             //load samenamed css file
             importCss(this.src.slice(0,-2)+'css');

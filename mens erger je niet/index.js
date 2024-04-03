@@ -119,6 +119,11 @@ class MensErgerJeNiet extends HTMLElement {
       // e.detail.from.append(e.detail.piece);
     }
 
+    movePiece(from,to){
+      //from and to so both player and otherboards go trought the same function
+      
+    }
+
     changeTurn(){
       //todo implement multiplayer with the information of the given turn ?
       this.turn ++;
@@ -190,7 +195,7 @@ class MensErgerJeNiet extends HTMLElement {
     }
 
     get playerpath(){
-      // make a coppie of the path then change the startingpoint
+      // make a coppie of the path then change the startingpoint change green yellow
       const path = this.walkingPath.slice();
       const x = (this.turn -1) *10;
       for(let i = 0; i < x ; i++){
@@ -245,8 +250,10 @@ class MensErgerJeNiet extends HTMLElement {
     }
 
     get finishTiles(){
-      return Array.from(this.querySelectorAll(`grid-tile[finish="${this.turn}"]`));
+      const tiles = Array.from(this.querySelectorAll(`grid-tile[finish="${this.turn}"]`));
+      return this.turn > 2? tiles.reverse() : tiles;
     }
+  
 
     get dice(){
       return document.querySelector('roll-dice');
