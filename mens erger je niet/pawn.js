@@ -1,11 +1,13 @@
 class Pawn extends HTMLElement{
-    constructor(team){
+    constructor(team,pawnNumber){
         super();
         this.team = team;
+        this.pawnNumber = pawnNumber;
     }
 
     connectedCallback(){
         this.setAttribute('player', this.team);
+        this.setAttribute('number', this.pawnNumber);
     }
 
     get grid(){
