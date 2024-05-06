@@ -20,7 +20,7 @@ class MensErgerJeNiet extends HTMLElement {
       super();
         this.grid = new GameGrid(11,11,{pattern : 'none', playerCount : 4 , draggable:true});
         this.turn = 1
-
+        this.eventLog = [];
 
            // Async function to await the import
     const asyncConstructor = async () => {
@@ -82,8 +82,11 @@ class MensErgerJeNiet extends HTMLElement {
       console.log(e);
       if(e.name == 'dice-throw-start'){
         this.toggleBlockDice(true);
+        this.turnEvent(`${this.player} started rolling dice`);
+        //todo send msg to other players that rolling started
       }else if(e.name == 'dice-rolled'){
         const diceValue = e.dice[0].value;
+        this.turnEvent(`${this.player} has rolled ${diceValue}`);
         //todo send to others the rolled dice.
         this.socket.testMsg({'action' : 'echo', diceValue});
         this.diceCheck(diceValue);
@@ -115,41 +118,27 @@ class MensErgerJeNiet extends HTMLElement {
       e = e.detail;
       if(e.target.moveType){
         //we can move here
-        //check if other pawn is there then return that to base
-        // if(e.target.piece){
-        //   const enemy = e.target.piece;
-        //   const base = this.getEmptyBase(enemy.team);
-        //   animatePiece(base,enemy);
-        // }
-        // animatePiece(e.target,e.piece);
-        // console.log(e.target,e.piece);
-        // //check for winncondition
-        // if(this.checkwin) this.handleWin();
-        // //check for second trow
-        // if(this.diceValue == 6){
-        //   //update draggable so new location is set
-        //   this.grid.setDragable();
-        //   this.toggleBlockDice(false);
-        //   this.toggleBlockPieces(true);
-        // }
-        // else this.changeTurn();
-
+        this.movePawn(e.target,e.piece);
+        //todo send info to other boards
       }
       else{
         //wrong move return piece
         animatePiece(e.from,e.piece);
       }
       this.grid.clearMoves();
-      // e.detail.from.append(e.detail.piece);
     }
 
+    //moves pawn checks for second trow or ends turn
     movePawn(to,piece){
+      //check if some other pawn is there and return it to base
       if(to.piece){
         const enemy = to.piece;
         const base = this.getEmptyBase(enemy.team);
         animatePiece(base,enemy);
+        this.turnEvent(`${this.player} moves from PLACEHOLDER to PLACEHOLDER and takes ${enemy.color} piece`);
       }
       animatePiece(to,piece);
+      this.turnEvent(`${this.player} moves it piece from PLACEHOLDER to PLACEHOLDER`)
       //check for winncondition
       if(this.checkwin) this.handleWin();
       //check for second trow
@@ -162,13 +151,21 @@ class MensErgerJeNiet extends HTMLElement {
       else this.changeTurn();
     }
 
+    turnEvent(text){
+      this.eventLog.push(text);
+      console.log(text);
+      //todo make a eventlog on screen to show the actions
+    }
+
     changeTurn(){
       //todo implement multiplayer with the information of the given turn ?
+      this.turnEvent(`${this.player} has ended his turn`);
       this.turn ++;
       if(this.turn > 4) this.turn = this.turn % 4;
       this.setAttribute('turn', this.turn);
       this.grid.changeTurn();
       this.toggleBlockDice(false);
+      this.turnEvent(`${this.player} starts his turn`);
     }
 
     createBoard(){
@@ -281,7 +278,7 @@ class MensErgerJeNiet extends HTMLElement {
 
     get player(){
       const arr = ['blauw','rood','groen','geel'];
-      return arr[this.turn];
+      return arr[this.turn-1];
     }
 
     get playerPieces(){
