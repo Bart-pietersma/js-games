@@ -22,6 +22,10 @@ class Pawn extends HTMLElement{
         return document.querySelector('mens-erger-je-niet');
     }
 
+    get number() {
+        return this.pawnNumber;
+    }
+
     get color(){
         const arr = ['blauw','rood','groen','geel'];
         return  arr[this.team -1];
