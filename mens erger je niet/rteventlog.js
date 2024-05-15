@@ -12,17 +12,18 @@ class EventLog extends HTMLElement{
 
         //add eventlistners
         document.addEventListener(`rteventlog`, e => this.event(e));
-        this.addEventListener(`click`, e => this.toggleShow());
+        this.addEventListener(`click`, e => this.toggleShow(e));
     }
 
-    toggleShow(){
-        this.toggleAttribute('closed');
+    toggleShow(e){
+        console.log(e.target);
+        if(e.target.id == 'eventlogheader') this.toggleAttribute('closed');
     }
 
     event(e){
         const [player, msg] = e.detail;
         const p1  = document.createElement(`span`);  const p2  = document.createElement(`span`);  const p3  = document.createElement(`span`);
-        p1.innerText = new Date().toLocaleTimeString()
+        p1.innerText = new Date().toLocaleTimeString().substring(0,5);
         p2.innerText = player;
         p3.innerText = msg;
         this.body.prepend(...[p1,p2,p3]);
@@ -31,6 +32,10 @@ class EventLog extends HTMLElement{
     clearLog(){
         this.body.innerHTML = '';
         return(`log has been cleared`);
+    }
+
+    changeHeader(txt){
+        this.header.innerText = txt;
     }
 
     buildHtml(){

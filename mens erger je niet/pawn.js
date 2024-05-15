@@ -60,6 +60,11 @@ class Pawn extends HTMLElement{
         else if(this.onFinish)return false;
         else if(!this.onBase){
             //todo fix when going past end
+            if(this.location + diceroll >= this.path.length){
+                const fromBack = this.location + diceroll - (this.path.length - 1) + 1;
+                return this.path[this.path.length - fromBack];
+            }
+
             const tile = this.path[this.location + diceroll];
             if(tile.piece?.team != this.team)return tile; 
             return false;

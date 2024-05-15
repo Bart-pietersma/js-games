@@ -131,14 +131,16 @@ class MensErgerJeNiet extends HTMLElement {
     //moves pawn checks for second trow or ends turn
     movePawn(to,piece){
       //check if some other pawn is there and return it to base
+      let extraText= '';
       if(to.piece){
         const enemy = to.piece;
         const base = this.getEmptyBase(enemy.team);
         animatePiece(base,enemy);
-        this.turnEvent(` moves pion nmb ${piece.number} to ${to.coord} and takes ${enemy.color} piece`);
+        // this.turnEvent(` moves pion nmb ${piece.number} to ${to.coord} and takes ${enemy.color} piece`);
+        extraText = `and takes ${enemy.color} piece`;
       }
       animatePiece(to,piece);
-      this.turnEvent(` moves pion nmb ${piece.number} to ${to.coord} `);
+      this.turnEvent(` moves pion nmb ${piece.number} to ${to.coord} ` + extraText);
       //check for winncondition
       if(this.checkwin) this.handleWin();
       //check for second trow
@@ -278,7 +280,7 @@ class MensErgerJeNiet extends HTMLElement {
 
     get playerPiecesInPlay(){
       return this.playerPieces.filter(piece => {
-        if(!piece.onBase)return piece;
+        if(!piece.onBase && !piece.onFinish)return piece;
       });
     }
 
