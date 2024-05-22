@@ -59,7 +59,7 @@ class Pawn extends HTMLElement{
         if(this.onBase && diceroll == 6 && this.path[0].piece?.team != this.team) return this.path[0];
         else if(this.onFinish)return false;
         else if(!this.onBase){
-            //todo fix when going past end
+            //check if going past finish and counts backwards
             if(this.location + diceroll >= this.path.length){
                 const fromBack = this.location + diceroll - (this.path.length - 1) + 1;
                 return this.path[this.path.length - fromBack];

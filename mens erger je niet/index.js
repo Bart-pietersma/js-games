@@ -4,12 +4,9 @@ import { EndScreen } from "https://rtdb.nl/bplib/end-screen.js";
 // import {RtSocket} from "https://rtdb.nl/rtsocket.js";
 import { Pawn } from "./pawn.js";
 import { EventLog } from "./rteventlog.js";
-//! simulate other mouses to give a more inclusive veeling ?
-//todo walk backwarts when going past
-//todo fix the end tiles to count from the correct side
 /* 
-seprate dice and move comands for ws?
-make die sides svgs to whow other players trown dice
+seprate dice and move comands for ws? DONE
+make die sides svgs to show other players trown dice 
 
 cros msg locations
 change turn?
@@ -94,7 +91,7 @@ class MensErgerJeNiet extends HTMLElement {
 
     diceCheck(diceValue){
       //check if player can play
-      if(diceValue == 6 || this.playerPiecesInPlay.length > 0){
+      if(this.playerPieces.map(piece => piece.moveTiles).filter(x => x).length > 0){
         console.log('we can play');
         this.toggleBlockPieces(false);
       }
@@ -104,6 +101,7 @@ class MensErgerJeNiet extends HTMLElement {
         this.changeTurn();
       }
     }
+
 
     onDragstart(e){
       const piece = e.detail.piece;
