@@ -1,0 +1,25 @@
+rtevent-msg{
+    display: block;
+    position: absolute;
+    margin: auto;
+    padding: 4rem;
+    border-radius: 5px;
+    z-index: 9999999;
+    animation: rtmsgdisplay;
+}
+
+@keyframes rtmsgdisplay {
+    0%{
+        opacity: 0%;
+        transform: translateY(2vh);
+    }
+
+    50%{
+        opacity: 100%;
+    }
+
+    100%{
+        opacity: 0%;
+        transform: translatey(-2vh);
+    }
+}

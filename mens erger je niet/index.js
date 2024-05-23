@@ -1,9 +1,8 @@
 import { GameGrid } from "https://rtdb.nl/bplib/grid.js";
 import {animatePiece} from "https://rtdb.nl/functions.js";
 import { EndScreen } from "https://rtdb.nl/bplib/end-screen.js";
-// import {RtSocket} from "https://rtdb.nl/rtsocket.js";
 import { Pawn } from "./pawn.js";
-import { EventLog } from "./rteventlog.js";
+import { RtEventMsg } from "./rteventmsg.js";
 /* 
 seprate dice and move comands for ws? DONE
 make die sides svgs to show other players trown dice 
@@ -155,12 +154,21 @@ class MensErgerJeNiet extends HTMLElement {
       //sends the msg to a rtevent-log
       console.log(text);
       const event = new CustomEvent('rteventlog',{detail : [this.player, text]});
+      this.displayEvent(`${this.player} ${text}`);
       document.dispatchEvent(event);
     }
 
     sendEvent(type , payload){
       //todo check if socket is up
       // this.socket.sendEvent()
+    }
+    displayEvent(msg , color = 'pink' , duration = 3){
+
+      if(!this.querySelector('rtevent-msg')){
+        //first instance of a msg
+        // this.
+      }
+      this.append(new RtEventMsg(msg,color,duration));
     }
 
     changeTurn(){
