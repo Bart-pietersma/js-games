@@ -1,7 +1,8 @@
 rtevent-msg{
     display: block;
     position: absolute;
-    margin: auto;
+    margin-inline: auto;
+    margin-top: -40%;
     padding: 4rem;
     border-radius: 5px;
     z-index: 9999999;

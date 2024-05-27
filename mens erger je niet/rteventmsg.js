@@ -12,10 +12,15 @@ class RtEventMsg extends HTMLElement {
      }
 
      connectedCallback(){
+      this.start = new Date();
         setTimeout(() => {
             this.remove();
         }, this.timing);
 
+     }
+
+     get timeDisplayed(){
+      console.log(new Date() - this.start);
      }
 
 

@@ -3,6 +3,7 @@ import {animatePiece} from "https://rtdb.nl/functions.js";
 import { EndScreen } from "https://rtdb.nl/bplib/end-screen.js";
 import { Pawn } from "./pawn.js";
 import { RtEventMsg } from "./rteventmsg.js";
+import { RtQueue } from "https://rtdb.nl/bplib/rtqueue.js";
 /* 
 seprate dice and move comands for ws? DONE
 make die sides svgs to show other players trown dice 
@@ -17,6 +18,8 @@ class MensErgerJeNiet extends HTMLElement {
       super();
         this.grid = new GameGrid(11,11,{pattern : 'none', playerCount : 4 , draggable:true});
         this.turn = 1
+        this.queue = new RtQueue(this , 1500);
+        this.multie = false;
 
            // Async function to await the import
     const asyncConstructor = async () => {
@@ -74,7 +77,6 @@ class MensErgerJeNiet extends HTMLElement {
 
     diceRoll(e){
       e = e.detail;
-      console.log(e);
       if(e.name == 'dice-throw-start'){
         this.toggleBlockDice(true);
         this.turnEvent(`started rolling dice`,true);
@@ -83,7 +85,7 @@ class MensErgerJeNiet extends HTMLElement {
         const diceValue = e.dice[0].value;
         this.turnEvent(` has rolled ${diceValue}`);
         //todo send to others the rolled dice.
-        this.socket.testMsg({'action' : 'echo', diceValue});
+        if(this.multie)this.socket.testMsg({'action' : 'echo', diceValue});
         this.diceCheck(diceValue);
       }
     }
@@ -91,7 +93,6 @@ class MensErgerJeNiet extends HTMLElement {
     diceCheck(diceValue){
       //check if player can play
       if(this.playerPieces.map(piece => piece.moveTiles).filter(x => x).length > 0){
-        console.log('we can play');
         this.toggleBlockPieces(false);
       }
       //player cant play skip turn
@@ -116,7 +117,7 @@ class MensErgerJeNiet extends HTMLElement {
         //we can move here
         this.movePawn(e.target,e.piece);
         //todo send info to other boards
-        this.socket.testMsg({'action' : 'echo' , 'detail' : [e.target.coord, e.piece.number]});
+        if(this.multie)this.socket.testMsg({'action' : 'echo' , 'detail' : [e.target.coord, e.piece.number]});
       }
       else{
         //wrong move return piece
@@ -152,9 +153,9 @@ class MensErgerJeNiet extends HTMLElement {
 
     turnEvent(text,send = false){
       //sends the msg to a rtevent-log
-      console.log(text);
       const event = new CustomEvent('rteventlog',{detail : [this.player, text]});
-      this.displayEvent(`${this.player} ${text}`);
+      //todo display for other board moves not ur own
+      // this.displayEvent(`${this.player} ${text}`);
       document.dispatchEvent(event);
     }
 
@@ -162,24 +163,24 @@ class MensErgerJeNiet extends HTMLElement {
       //todo check if socket is up
       // this.socket.sendEvent()
     }
-    displayEvent(msg , color = 'pink' , duration = 3){
-
+    displayEvent(msg , color = 'coral' , duration = 3){
       if(!this.querySelector('rtevent-msg')){
-        //first instance of a msg
-        // this.
+        this.append(new RtEventMsg(msg,color,duration));
       }
-      this.append(new RtEventMsg(msg,color,duration));
+      else{
+        this.queue.addMessage(new RtEventMsg(msg,color,duration))
+      } 
     }
 
     changeTurn(){
       //todo implement multiplayer with the information of the given turn ?
-      this.turnEvent(` has ended his turn`);
+      this.turnEvent(` has ended his turn and ${this.nextPlayer} has started`);
       this.turn ++;
       if(this.turn > 4) this.turn = this.turn % 4;
       this.setAttribute('turn', this.turn);
       this.grid.changeTurn();
       this.toggleBlockDice(false);
-      this.turnEvent(` starts his turn`);
+      // this.turnEvent(` starts his turn`);
     }
 
     createBoard(){
@@ -293,6 +294,11 @@ class MensErgerJeNiet extends HTMLElement {
     get player(){
       const arr = ['blauw','rood','groen','geel'];
       return arr[this.turn-1];
+    }
+
+    get nextPlayer(){
+      const arr = ['blauw','rood','groen','geel'];
+      return this.turn == 4 ? arr[0] : arr[this.turn];
     }
 
     get playerPieces(){
