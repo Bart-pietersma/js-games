@@ -1,9 +1,11 @@
 import { importCss } from "./functions.js";
 import { GameGrid } from "https://rtdb.nl/bplib/grid.js";
 
-customElements.define("minesweeper-board", class Board extends HTMLElement {
-    constructor() {
+class Board extends HTMLElement {
+    constructor(x =16 , y = 12) {
         super();
+        this.setAttribute('x',x);
+        this.setAttribute('y',y);
         this.init = 1;
         this.firstClick = true;
         this.life = this.hasAttribute("life") ? this.getAttribute("life") : 1;
@@ -220,6 +222,7 @@ customElements.define("minesweeper-board", class Board extends HTMLElement {
         window.alert("u loose");
     }
 
-});
-
+};
+customElements.define("minesweeper-board",Board);
 console.log(`board.js loaded`);
+export {Board}

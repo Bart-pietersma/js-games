@@ -1,4 +1,4 @@
-import { importCss } from "./functions.js";
+import { importCss } from "../../functions.js";
 import "./masterrow.js";
 /*
 
@@ -9,7 +9,7 @@ import "./masterrow.js";
         ::after corect collors and place
 
 */
-customElements.define("master-mind", class MasterMind extends HTMLElement{
+class MasterMind extends HTMLElement{
     constructor(){
         super();
         this.init = true;
@@ -126,5 +126,7 @@ customElements.define("master-mind", class MasterMind extends HTMLElement{
         window.alert("u lost");
     }
     
-});
+};
+customElements.define("master-mind", MasterMind);
+export{MasterMind}
 

@@ -206,5 +206,5 @@ class CheckerBoard extends HTMLElement {
 }
 customElements.define('checker-board', CheckerBoard);
 
-document.body.append(new CheckerBoard())
+// document.body.append(new CheckerBoard())
 export { CheckerBoard };

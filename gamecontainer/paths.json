@@ -1,0 +1,7 @@
+{
+    "mens erger je niet":"MensErgerJeNiet|../mens erger je niet/index.js",
+    "dammen":"CheckerBoard|../oldGames/dammen/dammen.js",
+    "breakout":"BreakoutContainer|../oldGames/breakout/breakout.js",
+    "mastermind":"MasterMind|../oldGames/mastermind/mastermind.js",
+    "minesweeper":"Board|../oldGames/Minesweeper/board.js"
+}

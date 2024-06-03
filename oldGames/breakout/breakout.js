@@ -231,3 +231,4 @@ class BreakoutContainer extends HTMLElement {
 
 // Define the custom element
 customElements.define('breakout-container', BreakoutContainer);
+export {BreakoutContainer};

@@ -1,5 +1,4 @@
 function importCss(path){
-
   let name = path.split('/');
   const last = name.length -1;
   name = name[last].split('.');

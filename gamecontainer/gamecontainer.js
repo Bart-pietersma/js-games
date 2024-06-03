@@ -2,7 +2,7 @@ import { RTChatbox } from 'https://rtdb.nl/rtchatbox.js';
 import { RtSocket} from "https://rtdb.nl/rtsocket.js";
 import { RtGameMenu } from './rtgamemenu.js';
 import { importCss } from '../functions.js';
-// import { MensErgerJeNiet } from "../mens erger je niet/index.js";
+import paths from './paths.json' with {type:'json'};
 
 class GameContainer extends HTMLElement{
     constructor(){
@@ -11,12 +11,12 @@ class GameContainer extends HTMLElement{
         if(window.location.search.length > 0){
             //we have a joinrequest
         };
-        import(this.src).then((module) =>{
-            console.log(module);
-            this.game = module[this.gameName]
-            //load samenamed css file
-            importCss(this.src.slice(0,-2)+'css');
-        });
+        // import(this.src).then((module) =>{
+        //     console.log(module);
+        //     this.game = module[this.gameName]
+        //     //load samenamed css file
+        //     importCss(this.src.slice(0,-2)+'css');
+        // });
         //todo localstorage check for user
 
         //ws
@@ -52,6 +52,7 @@ class GameContainer extends HTMLElement{
         this.addEventListener(`db-newgame`, e => this.makeBoard(e));
         document.addEventListener(`db-joinGame`, e => this.makeBoard(e));
         document.addEventListener(`db-getOpenGames`, e => this.makeLobyBrowser(e));
+        document.addEventListener(`gameSelected`, e => this.makeSelectedGame(e));
     }
     closestElement(selector, el = this) {
         return (
@@ -62,7 +63,20 @@ class GameContainer extends HTMLElement{
 
     makeGameMenu(){
         this.clear();
-        this.append(new RtGameMenu(this));
+        this.append(new RtGameMenu(this,paths));
+    }
+    makeSelectedGame(e){
+        this.clear();
+        const [name,path] = e.detail.split('|');
+        import(path).then((module) =>{
+            console.log(module);
+            this.game = module[name]
+            // this.game =module;
+            //load samenamed css file
+            console.log(name);
+            importCss(path.slice(0,-2)+'css');
+            this.append(new this.game());
+        });
     }
 
     makeBoard(e){
