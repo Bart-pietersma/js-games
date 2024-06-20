@@ -10,6 +10,10 @@ master-mind{
     align-items: center;
 }
 
+master-mind *{
+    margin-inline: 0.5em;
+}
+
 #colorShowDiv {
     display: flex;
     background-color: rgb(11, 12, 7);
@@ -46,7 +50,7 @@ master-slot{
     background-color: gray;
 }
 
-master-row[active]::after{
+/* master-row[active]::after{
     content: "⬅️";
     width: 0;
 }
@@ -60,4 +64,4 @@ master-row[hint2]::after{
     content: attr(hint2);
     color: red;
     width: 0;
-}
+} */

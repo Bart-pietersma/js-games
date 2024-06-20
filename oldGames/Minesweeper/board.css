@@ -9,6 +9,7 @@ minesweeper-board{
     display: block;
     width: fit-content;
     margin: auto;
+    color: #fff;
 }
 
 game-grid{

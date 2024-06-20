@@ -9,6 +9,7 @@ class BreakoutRow extends HTMLElement {
   
     connectedCallback() {
        const blockCount = this.container.clientWidth / this.blocksize ;
+       console.log(this.container);
         for(let i = 0 ; i < blockCount; i++){
             this.append(new BreakoutBlock(this.lives))
         }

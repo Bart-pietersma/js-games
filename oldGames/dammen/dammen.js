@@ -120,7 +120,7 @@ class CheckerBoard extends HTMLElement {
     connectedCallback() {
         this.append(this.grid);
         this.placePieces();
-        this.grid.setDraggable();
+        this.grid.setDragable();
 
         //eventlistners
 

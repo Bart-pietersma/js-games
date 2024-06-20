@@ -75,7 +75,10 @@ class GameContainer extends HTMLElement{
             //load samenamed css file
             console.log(name);
             importCss(path.slice(0,-2)+'css');
-            this.append(new this.game());
+            //todo need a timeout for breakout so css is loaded first for it to work
+            setTimeout(() => {
+                this.append(new this.game());
+            },100);
         });
     }
 

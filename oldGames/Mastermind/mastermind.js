@@ -13,6 +13,11 @@ class MasterMind extends HTMLElement{
     constructor(){
         super();
         this.init = true;
+        //check if we got rows and if not then set default rows and slots
+        if(this.rows == 0){
+            this.setAttribute('rows',12);
+            this.setAttribute('slots',4);
+        }
         this.colors = this.makeRandomColors();
         this.secret = this.makeSecretCode();
         console.log(this.secret);
@@ -91,6 +96,13 @@ class MasterMind extends HTMLElement{
             this.activeRow.setHints(corect.length,color.length);
             this.changeActiveRow();
         }
+    }
+
+    makeButton(){
+        const btn = document.createElement('button');
+        btn.innerText = `⬅️`;
+        btn.onclick = () => document.querySelector('master-mind').checkCode();
+        return btn;
     }
 
     changeActiveRow(){
