@@ -8,31 +8,29 @@ master-mind{
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-master-mind *{
-    margin-inline: 0.5em;
+    background-color: white;
+    padding: 1px;
+    row-gap: 1px;
 }
 
 #colorShowDiv {
     display: flex;
     background-color: rgb(11, 12, 7);
-    outline: auto;
+    justify-content: center;
 }
 
 #colorShowDiv div {
     width: var(--slot-width);
     height: var(--slot-heigt);
-    margin-block: 1em;
+    margin: 1em;
 }
 
 master-row{
-    padding-inline: var(--slot-width);
     padding-block: calc(var(--slot-heigt) / 2);
     display: flex;
     align-items: center;
+    justify-content: center;
     background-color: rgb(11, 12, 7);
-    outline: auto;
 }
 
 master-slot:first-child{
@@ -49,6 +47,18 @@ master-slot{
     border-radius: 50%;
     background-color: gray;
 }
+master-slot,#colorShowDiv div{
+    margin-inline: 0.5rem;
+}
+[hint1],[hint2]{
+    width: 35px;
+}
+master-row, #colorShowDiv{
+    width: 300px;
+}
+
+
+
 
 /* master-row[active]::after{
     content: "⬅️";

@@ -142,3 +142,18 @@ class MasterMind extends HTMLElement{
 customElements.define("master-mind", MasterMind);
 export{MasterMind}
 
+
+function generateDistinctColors(numColors) {
+    const colors = [];
+    const hueStep = 360 / numColors;
+
+    for (let i = 0; i < numColors; i++) {
+        const hue = i * hueStep;
+        const color = `hsl(${hue}, 100%, 50%)`;
+        colors.push(color);
+    }
+
+    return colors;
+}
+
+console.log(generateDistinctColors(10));
