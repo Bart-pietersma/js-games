@@ -5,6 +5,12 @@
     --color-active : #002eac ;
     --color-sweep : #ba1010 ;
 }
+
+body{
+    color: #fff;
+    background-color: darkslategray;
+}
+
 minesweeper-board{
     display: block;
     width: fit-content;

@@ -2,12 +2,7 @@ import { importCss } from "../../functions.js";
 import "./masterrow.js";
 /*
 
-<mastermind>
-    <master-row>
-        ::before corect colors
-            4x <marker>
-        ::after corect collors and place
-
+todo add logic so the correct collor but incorect place works when the
 */
 class MasterMind extends HTMLElement{
     constructor(){
@@ -18,7 +13,7 @@ class MasterMind extends HTMLElement{
             this.setAttribute('rows',12);
             this.setAttribute('slots',4);
         }
-        this.colors = this.makeRandomColors();
+        this.colors = this.generateDistinctColors(this.colorCount);
         this.secret = this.makeSecretCode();
         console.log(this.secret);
     }
@@ -39,6 +34,7 @@ class MasterMind extends HTMLElement{
             this.colors.map(color =>{
                 const div = document.createElement('div');
                 div.style.backgroundColor = color;
+                div.setAttribute('code',color);
                 colorShowDiv.append(div);
             });
             this.append(colorShowDiv);
@@ -46,14 +42,51 @@ class MasterMind extends HTMLElement{
         }
     }
 
-    makeRandomColors(){
-        const array = []
-        while(array.length < this.colorCount){
-            const color = "#" + Math.floor(Math.random()*16777215).toString(16);
-            if(color.length == 7) array.push(color);
-        }
-        return array;
+    // makeRandomColors(){
+    //     const array = []
+    //     while(array.length < this.colorCount){
+    //         const color = "#" + Math.floor(Math.random()*16777215).toString(16);
+    //         if(color.length == 7) array.push(color);
+    //     }
+    //     return array;
+    // }
+
+
+    generateRandomHSLColor() {
+        const hue = Math.floor(Math.random() * 360);
+        const saturation = 100; // Full saturation for vibrant colors
+        const lightness = 50;   // Mid lightness for balance
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     }
+    
+     colorDistance(color1, color2) {
+        const [h1] = color1.match(/\d+/g).map(Number);
+        const [h2] = color2.match(/\d+/g).map(Number);
+    
+        const dh = Math.min(Math.abs(h1 - h2), 360 - Math.abs(h1 - h2));
+        return dh;
+    }
+    
+     generateDistinctColors(numColors, minDistance = 30, maxRetries = 1000) {
+        const colors = [];
+        let retries = 0;
+        
+        while (colors.length < numColors && retries < maxRetries) {
+            const newColor = this.generateRandomHSLColor();
+            if (colors.every(existingColor => this.colorDistance(existingColor, newColor) >= minDistance)) {
+                colors.push(newColor);
+            } else {
+                retries++;
+            }
+        }
+    
+        if (colors.length < numColors) {
+            console.warn(`Only generated ${colors.length} distinct colors after ${maxRetries} retries.`);
+        }
+    
+        return colors;
+    }
+
 
     makeSecretCode(){
        const numbers = [];
@@ -79,18 +112,21 @@ class MasterMind extends HTMLElement{
         let color = [];
         let i = 0;
         code.map(col =>{
-            console.log(col);
             if(this.secret[i] == col)corect.push(col);
             i++
         });
-        if(corect == this.slots)this.win();
+        if(corect.length == this.slots)this.win();
         else{
             i = 0;
             code.map(col =>{
+                console.log(col , this.secret[i]);
+                console.log(this.secret[i] != col);
+                console.log(this.secret.includes(col));
                 //todo add the rules for 2 colors
-                if(this.secret[i] != col && !corect.includes(col)){
+                if(this.secret[i] != col && !corect.includes(col) && this.secret.includes(col)){
                     color.push(col);
                 }
+                i++;
             });
             console.log(corect,color);
             this.activeRow.setHints(corect.length,color.length);
@@ -100,7 +136,7 @@ class MasterMind extends HTMLElement{
 
     makeButton(){
         const btn = document.createElement('button');
-        btn.innerText = `⬅️`;
+        btn.innerText = `check`;
         btn.onclick = () => document.querySelector('master-mind').checkCode();
         return btn;
     }
@@ -143,17 +179,6 @@ customElements.define("master-mind", MasterMind);
 export{MasterMind}
 
 
-function generateDistinctColors(numColors) {
-    const colors = [];
-    const hueStep = 360 / numColors;
 
-    for (let i = 0; i < numColors; i++) {
-        const hue = i * hueStep;
-        const color = `hsl(${hue}, 100%, 50%)`;
-        colors.push(color);
-    }
 
-    return colors;
-}
-
-console.log(generateDistinctColors(10));
+// Example usage

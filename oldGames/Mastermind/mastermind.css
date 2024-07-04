@@ -3,6 +3,10 @@
     --slot-heigt : 1.5em ;
 }
 
+body{
+    color: #fff;
+    background-color: darkslategray;
+}
 
 master-mind{
     display: flex;
@@ -52,6 +56,12 @@ master-slot,#colorShowDiv div{
 }
 [hint1],[hint2]{
     width: 35px;
+}
+[hint1]{
+    color: yellow;
+}
+[hint2]{
+    color: green;
 }
 master-row, #colorShowDiv{
     width: 300px;

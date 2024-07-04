@@ -49,7 +49,6 @@ customElements.define("master-row" , class MasterRow extends HTMLElement{
         if(bool){
             //check if the button existest if not make it and place if
             if(!this.board.querySelector('button')){
-                console.log(124);
                 this.hint2.append(this.board.makeButton());
             }
             else{
@@ -61,8 +60,10 @@ customElements.define("master-row" , class MasterRow extends HTMLElement{
     }
 
     setHints(corect,color){
-        this.setAttribute("hint1",color);
-        this.setAttribute("hint2",corect );
+        // this.setAttribute("hint1",color);
+        // this.setAttribute("hint2",corect );
+        this.hint1.innerText = color;
+        this.hint2.innerText = corect
     }
 
 });
