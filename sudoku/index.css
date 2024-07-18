@@ -1,0 +1,61 @@
+
+
+sudoku-game{
+    --userColor : blue;
+    --option-color : violet;
+    --border-color : orange;
+    --background-color : beige;
+    --square-size : 7vh;
+
+
+    margin-top: 5vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 6vh;
+    text-align: center;
+    font-weight: 900;
+    width: fit-content;
+    margin: auto;
+}
+
+sudoku-game game-grid{
+    border-top:  3px solid var(--border-color);
+    border-left: 3px solid var(--border-color);
+    grid-template-columns: repeat(3 , 65px 65px 67px);
+}
+
+grid-tile:nth-child(3n) {
+    border-right: 2px solid var(--border-color);
+  }
+
+grid-tile:nth-child(n + 19):nth-child(-n + 27),
+grid-tile:nth-child(n + 46):nth-child(-n + 54),
+grid-tile:nth-child(n + 73):nth-child(-n + 81) {
+  margin-bottom: 2px;
+}
+
+
+sudoku-game grid-tile[color="1"]{
+    background-color: var(--background-color);
+}
+
+#selectbar{
+    display: flex;
+    border: 1px solid var(--border-color);
+    background-color: var(--border-color);
+    gap: 1px;
+    margin-top: 5vh;
+}
+div[number]{
+    width: var(--square-size);
+    background-color: var(--background-color);
+    color: var(--option-color);
+}
+div[number][selected]{
+    color: var(--userColor);
+}
+[userValid]{
+    color: var(--userColor);
+}
