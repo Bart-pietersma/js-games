@@ -6,12 +6,13 @@ class Paard extends HTMLElement{
             const type = this.pieceTypes["n"];
             type && this.toggleAttribute(type , true);
             this.setAttribute(`player`, 1);
+
             //make img
-            const img = document.createElement('img');
-            img.src = `./black-knight.svg`
-            img.width = 80;
-            img.height = 80;
-            this.append(img);
+            // const img = document.createElement('img');
+            // img.src = `./black-knight.svg`
+            // img.width = 80;
+            // img.height = 80;
+            // this.append(img);
     }
 
     connectedCallback(){
@@ -25,16 +26,13 @@ class Paard extends HTMLElement{
         );
     }
     get grid() {
-        return this.closestElement("chess-grid");
+        return this.closestElement("game-grid");
     }
 
-    get board(){
-        return this.closestElement('chess-board');
-    }
 
     get cell(){
         //to prefent a inf loop when a piece is not on the board
-        return this.parentElement.nodeName == 'CHESS-TILE'? this.closestElement("chess-tile"): false;
+        return this.parentElement.nodeName == 'GRID-TILE'? this.closestElement("grid-tile"): false;
     }
 
     get x(){
@@ -79,11 +77,18 @@ class Paard extends HTMLElement{
 
     get moves(){
         // look at type and give back its moves
-        return this[this.type+'Moves'];
+        return { move : this.allowedMoves};
+    }
+
+    get knightMoves(){
+        const moves = [[this.x-2,this.y-1],[this.x -2, this.y+1],[this.x -1, this.y-2],[this.x -1, this.y+2],[this.x +1, this.y-2],[this.x +1, this.y+2],[this.x +2,this.y-1],[this.x +2,this.y+1]];
+        return this.grid.getCells(moves.map(coord =>{
+            if((coord[0] >= 0 && coord[0] < this.grid.columns.length )&&(coord[1] >= 0 && coord[1] < this.grid.rows.length))return coord ;
+        }).filter(n => n));
     }
 
     get allowedMoves(){
-            return this.moves
+            return this.knightMoves.filter(cell => !cell.hasAttribute('checked'));
     }
 
     attackcell(cell,king = false){

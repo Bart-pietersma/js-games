@@ -1,5 +1,5 @@
 import { GameGrid } from 'https://rtdb.nl/bplib/grid.js';
-import { animatePiece } from 'https://rtdb.nl/functions.js'
+import { } from 'https://rtdb.nl/functions.js'
 
 
 /*
@@ -8,19 +8,33 @@ a simple sudoku game that only validates the win at the end
 future plans
 add dificulty 
 more feedback for player higlight wrong earlyer
+add click and keyboard playstyle
 
 a temp selector
 
 
 */
 
+//globals
 const SIZE = 9;
 const EMPTY = 0;
+const EMPTYCELLS = 40;
+
+function seededRandom(seed) {
+    let x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+}
+
+function getDailySeed() {
+    let today = new Date();
+    return today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+}
+
 class SudokuGame extends HTMLElement{
-    constructor(){
+    constructor(daily = true){
         super()
         //building the game visuals
-        this.grid = new GameGrid(9,9);
+        this.grid = new GameGrid(SIZE,SIZE);
         this.append(this.grid);
         this.selectBar = document.createElement('div');
         this.selectBar.id = 'selectbar';
@@ -31,13 +45,23 @@ class SudokuGame extends HTMLElement{
             this.selectBar.append(block);
         }
         this.append(this.selectBar);
+        
+        //order the sudoku based on a daily random or random
+        let puzzleGrid = [];
+        if(daily){
+            this.seed = getDailySeed();
+            let completeGrid = this.generateSeededCompleteGrid();
+            this.solution = completeGrid;
+            puzzleGrid = completeGrid.map(row => row.slice());
+            this.removeNumbersSeeded(puzzleGrid, EMPTYCELLS)
+        }
+        else{
+            let completeGrid = this.generateCompleteGrid();
+            this.solution = completeGrid;
+            puzzleGrid = completeGrid.map(row => row.slice());
+            this.removeNumbers(puzzleGrid, EMPTYCELLS);
+        }
 
-
-        let completeGrid = this.generateCompleteGrid();
-        this.solution = completeGrid;
-        console.log(completeGrid);
-        let puzzleGrid = completeGrid.map(row => row.slice());
-        this.removeNumbers(puzzleGrid, 40);
         //put the puzzle in the grid
         for(let x = 0 ; x < this.grid.grid.length; x++){
             if(puzzleGrid.flat()[x] !== 0) this.grid.grid[x].innerText  = puzzleGrid.flat()[x];
@@ -58,13 +82,23 @@ class SudokuGame extends HTMLElement{
         return cells.length > 0 ? false : true;
     }
 
+    get keyInputCell(){
+        return this.querySelector('[keyinput]');
+    }
+
     connectedCallback() {
-        this.addEventListener('click', e => this.handleClickEvent(e));
+        document.addEventListener('click', e => this.handleClickEvent(e));
+        document.addEventListener('keypress' , e => this.handleKeyPress(e));
     }
 
     handleClickEvent(e){
         const target = e.target;
         const number = this.querySelector('[selected]')?.innerText
+        //check keyinput and remove if there
+        if(this.keyInputCell){
+            if(this.keyInputCell != target) this.keyInputCell.toggleAttribute(`keyinput`,false);
+        } 
+
         //check for selecting number
         if(target.hasAttribute('number')){
             //toggle the old selected off
@@ -87,6 +121,21 @@ class SudokuGame extends HTMLElement{
             else target.innerText = number;
 
             if(this.isFull) this.checkPuzzle() ? this.handleWin() : this.handleLoss();
+        }
+        //when selecting a valid cell with no number
+        else if(target.hasAttribute('userValid')){
+            target.toggleAttribute('keyinput');
+        }
+    }
+
+    handleKeyPress(e){
+        //check if a numberd key is pressed then look if thers a selected cell then put that number in the cell
+        if(+e.key == e.key){
+            if(this.keyInputCell){
+                const cell = this.keyInputCell;
+                const number = e.key;
+                cell.innerText = cell.innerText == number? '' : number;
+            }
         }
     }
 
@@ -161,6 +210,15 @@ class SudokuGame extends HTMLElement{
         }
         return array;
     }
+
+    seededShuffleArray(array, seed) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(seededRandom(seed) * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+            seed++;
+        }
+        return array;
+    }
     
     generateCompleteGrid() {
         let board = Array.from({ length: SIZE }, () => Array(SIZE).fill(EMPTY));
@@ -192,6 +250,34 @@ class SudokuGame extends HTMLElement{
     
         return board;
     }
+
+    generateSeededCompleteGrid() {
+        this.board = Array.from({ length: SIZE }, () => Array(SIZE).fill(EMPTY));
+        let numbers = this.seededShuffleArray([...Array(SIZE).keys()].map(x => x + 1), this.seed);
+
+        for (let i = 0; i < SIZE; i++) {
+            this.board[0][i] = numbers[i];
+        }
+
+        this.solveSudoku(this.board);
+
+        for (let i = 0; i < SIZE; i += 3) {
+            let rows = [i, i + 1, i + 2];
+            this.seededShuffleArray(rows, this.seed).forEach((row, index) => {
+                [this.board[i + index], this.board[row]] = [this.board[row], this.board[i + index]];
+            });
+        }
+
+        for (let j = 0; j < SIZE; j += 3) {
+            let cols = [j, j + 1, j + 2];
+            this.seededShuffleArray(cols, this.seed).forEach((col, index) => {
+                for (let row = 0; row < SIZE; row++) {
+                    [this.board[row][j + index], this.board[row][col]] = [this.board[row][col], this.board[row][j + index]];
+                }
+            });
+        }
+        return this.board
+    }
     
     removeNumbers(board, numberOfHoles) {
         while (numberOfHoles > 0) {
@@ -208,6 +294,27 @@ class SudokuGame extends HTMLElement{
                     numberOfHoles--;
                 }
             }
+        }
+    }
+
+    removeNumbersSeeded(board,numberOfHoles){
+        let attempts = 0;
+        const maxAttempts = 1000;
+        while (numberOfHoles > 0 && attempts < maxAttempts) {
+            let row = Math.floor(seededRandom(this.seed + attempts) * SIZE);
+            let col = Math.floor(seededRandom(this.seed + attempts +1) * SIZE);
+            if (board[row][col] !== EMPTY) {
+                let backup = board[row][col];
+                board[row][col] = EMPTY;
+
+                let copyBoard = board.map(row => row.slice());
+                if (!this.hasUniqueSolution(copyBoard)) {
+                    board[row][col] = backup;
+                } else {
+                    numberOfHoles--;
+                }
+            }
+            attempts++;
         }
     }
 
