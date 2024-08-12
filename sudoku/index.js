@@ -1,4 +1,5 @@
 import { GameGrid } from 'https://rtdb.nl/bplib/grid.js';
+import {EndScreen} from 'https://rtdb.nl/bplib/end-screen.js';
 import { } from 'https://rtdb.nl/functions.js'
 
 
@@ -10,6 +11,8 @@ add dificulty
 more feedback for player higlight wrong earlyer
 add click and keyboard playstyle
 
+localstorage for dailystuf and to save a inprogres run
+
 a temp selector
 
 
@@ -18,7 +21,7 @@ a temp selector
 //globals
 const SIZE = 9;
 const EMPTY = 0;
-const EMPTYCELLS = 40;
+// const EMPTYCELLS = 40;
 
 function seededRandom(seed) {
     let x = Math.sin(seed++) * 10000;
@@ -33,6 +36,16 @@ function getDailySeed() {
 class SudokuGame extends HTMLElement{
     constructor(daily = true){
         super()
+        //localstorage stuf
+        this.storagename = 'rtsudoku';
+        const today = new Date().toDateString();
+        //check if exist then make it
+        if(!localStorage.getItem(this.storagename)) localStorage.setItem(this.storagename , JSON.stringify(this.defaultStorage));
+        let storage = JSON.parse(localStorage.getItem(this.storagename));
+
+        //dificulty
+        const EMPTYCELLS = storage.difficulty == 'easy' ? 40 : storage.difficulty == 'medium'? 50 : 60 ;
+
         //building the game visuals
         this.grid = new GameGrid(SIZE,SIZE);
         this.append(this.grid);
@@ -67,7 +80,24 @@ class SudokuGame extends HTMLElement{
             if(puzzleGrid.flat()[x] !== 0) this.grid.grid[x].innerText  = puzzleGrid.flat()[x];
             else this.grid.grid[x].toggleAttribute('userValid', true);
         }
+
+        //more localstorage
+        if(storage.date != new Date().toDateString()){
+            //new day do stuf
+            storage.date = today;
+            storage.boardState = this.userPuzzle;
+            localStorage.setItem(this.storagename , JSON.stringify(storage));
+        }
+        //update the board with played moves from earlyer today
+        else if(storage.boardState != '') {
+
+        }
         
+    }
+
+    get defaultStorage(){
+        const day = new Date()
+        return {date : day.toDateString(), boardState : '' , winstreak : 0 , difficulty : 'easy'};
     }
 
     get userPuzzle(){
@@ -82,18 +112,30 @@ class SudokuGame extends HTMLElement{
         return cells.length > 0 ? false : true;
     }
 
+    get markedNumber(){
+        return this.selectBar.querySelector('[selected]');
+    }
+
     get keyInputCell(){
         return this.querySelector('[keyinput]');
     }
 
     connectedCallback() {
         document.addEventListener('click', e => this.handleClickEvent(e));
-        document.addEventListener('keypress' , e => this.handleKeyPress(e));
+        document.addEventListener('keydown' , e => this.handleKeyPress(e));
     }
 
     handleClickEvent(e){
+        /**
+         *  handles all the clicks
+         *  selectign a number
+         * setting a selected number
+         * selecting a cell for keyboard
+         * retargeting of keyboard
+         * 
+         */
         const target = e.target;
-        const number = this.querySelector('[selected]')?.innerText
+        const number = this.markedNumber?.innerText
         //check keyinput and remove if there
         if(this.keyInputCell){
             if(this.keyInputCell != target) this.keyInputCell.toggleAttribute(`keyinput`,false);
@@ -124,19 +166,54 @@ class SudokuGame extends HTMLElement{
         }
         //when selecting a valid cell with no number
         else if(target.hasAttribute('userValid')){
+            this.clearAll();
             target.toggleAttribute('keyinput');
+            if(target.innerText) this.highlightNumber(target.innerText);
+        }
+        //clicked on a locked tile hilight that number
+        else if(target.nodeName == 'GRID-TILE'){
+            const check = target.hasAttribute(`selected`);
+            this.clearAll()
+            if(!check) this.highlightNumber(target.innerText);
+        }
+        else{
+            //clicked awwway clear board
+            this.clearAll();
         }
     }
 
     handleKeyPress(e){
         //check if a numberd key is pressed then look if thers a selected cell then put that number in the cell
-        if(+e.key == e.key){
+        const number = e.key;
+        const cell = this.keyInputCell;
+        if(+number == number && number > 0 ){
             if(this.keyInputCell){
-                const cell = this.keyInputCell;
-                const number = e.key;
                 cell.innerText = cell.innerText == number? '' : number;
+                //clear old higlight
+                this.grid.grid.map(tile => tile.hasAttribute('selected') && tile.toggleAttribute(`selected`));
+
+                cell.innerText == number && this.grid.grid.map(tile => tile.innerText == number && tile.toggleAttribute(`selected`));
+                this.updateStorage();
             }
         }
+        else if (+number == number && number == 0){
+            cell.innerText = '';
+            this.clearAll();
+            this.updateStorage();
+        }
+    }
+
+    highlightNumber(number){
+            this.grid.grid.map(tile => tile.innerText == number && tile.toggleAttribute(`selected`));
+    }
+
+    clearBoard(number){
+        this.grid.grid.map(tile => tile.innerText == number && tile.toggleAttribute(`selected`));
+        this.markedNumber?.toggleAttribute(`selected`);
+    }
+
+    clearAll(){
+        this.grid.grid.map(tile => tile.toggleAttribute(`selected`, false));
     }
 
     checkPuzzle(){
@@ -145,10 +222,16 @@ class SudokuGame extends HTMLElement{
     }
 
     handleWin(){
-        console.log(`u won`);
+        this.append(new EndScreen('Je hebt gewonnen'));
     }
     handleLoss(){
         console.log(`u lost`);
+    }
+
+    updateStorage(){
+        let storage = JSON.parse(localStorage.getItem(this.storagename));
+        storage.boardState = this.userPuzzle;
+        localStorage.setItem(this.storagename , JSON.stringify(storage));
     }
 
 
@@ -516,11 +599,11 @@ function hasUniqueSolution(board) {
     solve(board);
     return solutions === 1;
 }
+
+let completeGrid = generateCompleteGrid();
+console.log('Complete Grid:', completeGrid);
+
+let puzzleGrid = completeGrid.map(row => row.slice());
+removeNumbers(puzzleGrid, 40);
+console.log('Puzzle Grid:', puzzleGrid);
 */
-
-// let completeGrid = generateCompleteGrid();
-// console.log('Complete Grid:', completeGrid);
-
-// let puzzleGrid = completeGrid.map(row => row.slice());
-// removeNumbers(puzzleGrid, 40);
-// console.log('Puzzle Grid:', puzzleGrid);
